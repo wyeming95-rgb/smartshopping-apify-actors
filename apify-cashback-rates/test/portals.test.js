@@ -19,6 +19,8 @@ test('Rakuten: rate from og:title, previous rate from the page, redirects to hom
 test('TopCashback: rate from the meta description (UK/AU) or the store block (US), never the banners', () => {
     const us = portal('topcashback-us').parse(page('https://www.topcashback.com/nike/'));
     assert.deepEqual([us.listed, us.merchantName, us.rate.rateText, us.rate.isUpTo], [true, 'Nike', '11%', false]);
+    const amazon = portal('topcashback-us').parse(page('https://www.topcashback.com/amazon/'));
+    assert.equal(amazon.rate.rateText, 'Up to 3%'); // not the $450 card promo above it
     const uk = portal('topcashback-uk').parse(page('https://www.topcashback.co.uk/asos/'));
     assert.deepEqual([uk.merchantName, uk.rate.rateValue], ['ASOS', 6]);
     const au = portal('topcashback-au').parse(page('https://www.topcashback.com.au/nike/'));

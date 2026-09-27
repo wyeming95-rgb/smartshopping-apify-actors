@@ -26,6 +26,10 @@ export const PAGES = {
 <span class="merch-cashback">11% Cash Back</span></div></div></div>`,
     },
     'https://www.topcashback.com/asos/': { status: 404, html: '<title>TopCashback | Error</title>' },
+    'https://www.topcashback.com/amazon/': {
+        html: `<title> Amazon Devices Offers, Cash Back, Discounts &amp; Coupons </title>
+<div class="merch-primary-slice "><p>Get $450 Cash Back with the partner credit card</p><span>Up to 3% Cash Back</span></div>`,
+    },
     'https://www.topcashback.co.uk/asos/': {
         html: `<title>ASOS Offers, Discounts &amp; Cashback Deals</title>
 <meta name="description" content="Save money at ASOS &amp; get up to up to 6% cashback. Simply click through to ASOS and shop as normal.">`,

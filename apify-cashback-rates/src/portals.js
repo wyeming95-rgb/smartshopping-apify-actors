@@ -43,9 +43,13 @@ function topCashback(id, country, base, currency) {
             const merchantName = (title(html) ?? '').split(/\s+(?:Offers|Cashback Offers|Cash Back Offers)\b/i)[0].trim() || null;
             // UK and AU state the rate in the meta description; the US site only shows it in the store's
             // main block, which comes after the navigation banners that advertise other stores' rates.
+            // The block can also advertise card or device promos ("$450 cash back"), so a percentage wins over
+            // an earlier fixed amount; a fixed amount is used only when the store has no percentage rate.
             const main = html.indexOf('merch-primary-slice');
+            const block = main === -1 ? '' : visibleText(html.slice(main, main + 30_000));
+            const blockPercent = block.match(/(?:up to\s*)?\d+(?:\.\d+)?\s?%\s*(?:cash\s?back|cashback)/i)?.[0];
             const rate = findCashbackRate(meta(html, 'description') ?? '', currency)
-                ?? (main === -1 ? null : findCashbackRate(visibleText(html.slice(main, main + 30_000)), currency));
+                ?? (blockPercent ? findCashbackRate(blockPercent, currency) : findCashbackRate(block, currency));
             return { listed: true, merchantName, rate };
         },
     };
