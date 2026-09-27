@@ -1,4 +1,4 @@
-# Cashback Rate Comparison — Rakuten, TopCashback, ShopBack & more
+# Cashback Rate Comparison — Rakuten, TopCashback & more
 
 **Find which cashback site pays the most for any store, in the US, UK and Australia, in one run.**
 
