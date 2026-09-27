@@ -139,12 +139,37 @@ async function boosts() {
     console.log(`posted ${posts.length} cashback changes${dryRun ? ' (dry run)' : ''}`);
 }
 
-const modes = { deals, boosts };
+/** Diagnoses the Telegram setup: which chat TELEGRAM_CHAT_ID points to, and which chats the bot has been added to. */
+async function check() {
+    if (dryRun) throw new Error('TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID must both be set for a check.');
+    const me = await telegram('getMe', {});
+    console.log(`Bot: @${me.username}`);
+    const shown = chatId.startsWith('@') ? chatId : `${chatId.slice(0, 5)}… (${chatId.length} characters)`;
+    try {
+        const chat = await telegram('getChat', { chat_id: chatId });
+        console.log(`TELEGRAM_CHAT_ID (${shown}) points to: "${chat.title}" (${chat.type}${chat.username ? `, @${chat.username}` : ', private'}, id ${chat.id})`);
+    } catch (err) {
+        console.log(`TELEGRAM_CHAT_ID (${shown}) does not resolve to a chat the bot can see: ${err.message}`);
+    }
+    // Telegram keeps the last 24 hours of updates, including "bot was added to / promoted in a chat" events.
+    const updates = await telegram('getUpdates', { allowed_updates: ['my_chat_member', 'channel_post'], limit: 100 });
+    const chats = new Map();
+    for (const u of updates) {
+        const ev = u.my_chat_member ?? u.channel_post;
+        if (ev?.chat) chats.set(ev.chat.id, { chat: ev.chat, status: u.my_chat_member?.new_chat_member?.status ?? chats.get(ev.chat.id)?.status ?? 'seen' });
+    }
+    if (!chats.size) console.log('No recent "added to chat" events. Remove the bot from the channel admins and add it again, then rerun this check.');
+    for (const { chat, status } of chats.values()) {
+        console.log(`Bot is ${status} in "${chat.title}" (${chat.type}) -> use TELEGRAM_CHAT_ID = ${chat.username ? `@${chat.username}` : chat.id}`);
+    }
+}
+
+const modes = { deals, boosts, check };
 const mode = process.argv[2];
 if (import.meta.url === `file://${process.argv[1]}`) {
     if (!apifyToken) throw new Error('APIFY_TOKEN is not set');
     if (!modes[mode]) throw new Error(`Usage: telegram-channel.mjs <${Object.keys(modes).join('|')}>`);
-    if (dryRun) console.log('TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set: dry run, nothing is posted.\n');
-    else await checkCanPost();
+    if (dryRun && mode !== 'check') console.log('TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set: dry run, nothing is posted.\n');
+    else if (mode !== 'check') await checkCanPost();
     await modes[mode]();
 }

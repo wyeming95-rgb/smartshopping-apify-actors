@@ -10,11 +10,11 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: "deals | boosts"
+        description: "deals | boosts | check (diagnose the Telegram setup)"
         required: true
         default: deals
         type: choice
-        options: [deals, boosts]
+        options: [deals, boosts, check]
 
 permissions:
   contents: read
