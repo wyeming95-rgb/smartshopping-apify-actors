@@ -7,21 +7,10 @@ import { gotScraping } from 'got-scraping';
 await Actor.init();
 
 const DEFAULT_TARGETS = [
-    { portal: 'topcashback-us-nike', url: 'https://www.topcashback.com/nike/', around: 'Nike' },
-    { portal: 'topcashback-us-walmart', url: 'https://www.topcashback.com/walmart/', around: 'Walmart' },
-    { portal: 'mrrebates-directory', url: 'https://www.mrrebates.com/merchants/all_merchants.asp', linkPattern: 'merchant', around: 'Cash Back' },
-    { portal: 'capitalone-ms', url: 'https://capitaloneshopping.com/s/marksandspencer.com/coupon', around: 'coupon-content-title' },
-    { portal: 'capitalone-amazon', url: 'https://capitaloneshopping.com/s/amazon.com/coupon', around: 'coupon-content-title' },
+    { portal: 'topcashback-us-nike', url: 'https://www.topcashback.com/nike/', around: 'merch-highlight__content' },
+    { portal: 'topcashback-us-walmart', url: 'https://www.topcashback.com/walmart/', around: 'merch-highlight__content' },
+    { portal: 'topcashback-us-sephora', url: 'https://www.topcashback.com/sephora/', around: 'merch-highlight__content' },
 ]
-
-const { targets = DEFAULT_TARGETS, useProxy = false } = (await Actor.getInput()) ?? {};
-
-const BOT_WALLS = [
-    ['cloudflare-challenge', /cf-chl|challenge-platform|Just a moment\.\.\.|cf_chl_opt/i],
-    ['perimeterx', /px-captcha|_pxAppId|perimeterx/i],
-    ['datadome', /captcha-delivery\.com|datadome/i],
-    ['akamai', /Access Denied[\s\S]{0,200}Reference #/i],
-];
 const RATE_RE = /(?:up to\s*)?\d+(?:\.\d+)?\s?%\s*(?:cash\s?back|cashback|rewards?|back)|(?:[$£]|A\$)\s?\d+(?:\.\d+)?\s*(?:cash\s?back|cashback)/gi;
 
 const proxyConfiguration = useProxy ? await Actor.createProxyConfiguration().catch(() => null) : null;
@@ -77,7 +66,7 @@ function analyze(html, target) {
         // Raw markup around the first few mentions of a marker string (merchant name, test id, ...).
         const idx = [];
         for (let i = html.indexOf(target.around); i !== -1 && idx.length < 5; i = html.indexOf(target.around, i + 400)) idx.push(i);
-        report.htmlAroundMarker = idx.map((i) => html.slice(Math.max(0, i - 250), i + 450).replace(/\s+/g, ' '));
+        report.htmlAroundMarker = idx.map((i) => html.slice(Math.max(0, i - 100), i + 1500).replace(/\s+/g, ' '));
     }
     if (target.linkPattern) {
         const re = new RegExp(target.linkPattern, 'i');
