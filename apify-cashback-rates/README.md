@@ -68,3 +68,14 @@ Pay per result: you are charged only for rates found. Portals that don't carry a
 - Rates are read from each portal's public store pages; no logins.
 - Rates change often, sometimes daily, so check `checkedAt`.
 - Store names are matched to each portal's store page by name. If a store isn't found, try its domain (e.g. `marksandspencer.com`).
+
+## Related Actors
+
+- [Cashback Boost Monitor](https://apify.com/smartshopping/cashback-boost-monitor): alerts when cashback rates for your stores go up, go down or appear.
+- [Rakuten Cashback Scraper](https://apify.com/smartshopping/rakuten-cashback-scraper): every Rakuten (US) store with its current rate.
+- [TopCashback Scraper](https://apify.com/smartshopping/topcashback-scraper): every TopCashback store in the US, UK and Australia with its current rate.
+- [Deal Scraper](https://apify.com/smartshopping/deal-community-scraper): the latest Slickdeals, hotukdeals and OzBargain deals, with keyword alerts.
+
+## Support
+
+Found a bug or need a portal added? Open an issue on the **Issues** tab.

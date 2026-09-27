@@ -84,8 +84,10 @@ Pay per deal: you are only charged for deals saved to the dataset. With **Only n
 
 ## Related Actors
 
-- [Cashback Rate Comparison](https://apify.com/smartshopping/cashback-rate-comparison): the best cashback rate for a store across Rakuten, TopCashback, ShopBack and more.
-- [Cashback Boost Monitor](https://apify.com/smartshopping/cashback-boost-monitor): alerts when cashback rates for your stores change.
+- [Cashback Rate Comparison](https://apify.com/smartshopping/cashback-rate-comparison): the best cashback for any store across Rakuten, TopCashback, BeFrugal, Capital One Shopping, Mr. Rebates and ShopBack (US, UK, AU).
+- [Cashback Boost Monitor](https://apify.com/smartshopping/cashback-boost-monitor): alerts when cashback rates for your stores go up, go down or appear.
+- [Rakuten Cashback Scraper](https://apify.com/smartshopping/rakuten-cashback-scraper): every Rakuten (US) store with its current rate.
+- [TopCashback Scraper](https://apify.com/smartshopping/topcashback-scraper): every TopCashback store in the US, UK and Australia with its current rate.
 
 ## Support
 

@@ -72,9 +72,10 @@ The store list comes from each TopCashback site's public sitemap. The Actor then
 
 ## Related Actors
 
+- [Cashback Rate Comparison](https://apify.com/smartshopping/cashback-rate-comparison): the best cashback for any store across Rakuten, TopCashback, BeFrugal, Capital One Shopping, Mr. Rebates and ShopBack (US, UK, AU).
+- [Cashback Boost Monitor](https://apify.com/smartshopping/cashback-boost-monitor): alerts when cashback rates for your stores go up, go down or appear.
 - [Rakuten Cashback Scraper](https://apify.com/smartshopping/rakuten-cashback-scraper): every Rakuten (US) store with its current rate.
-- [Cashback Rate Comparison](https://apify.com/smartshopping/cashback-rate-comparison): rates for your stores across Rakuten, TopCashback, BeFrugal, Capital One Shopping, Mr. Rebates and ShopBack.
-- [Cashback Boost Monitor](https://apify.com/smartshopping/cashback-boost-monitor): alerts when rates for your stores go up or down.
+- [Deal Scraper](https://apify.com/smartshopping/deal-community-scraper): the latest Slickdeals, hotukdeals and OzBargain deals, with keyword alerts.
 
 ## Support
 

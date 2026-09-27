@@ -91,7 +91,10 @@ Pay per change: you are only charged for changes reported. Runs where nothing ch
 
 ## Related Actors
 
-- [Cashback Rate Comparison](https://apify.com/smartshopping/cashback-rate-comparison): current rates for any store across all portals, with the best rate per country.
+- [Cashback Rate Comparison](https://apify.com/smartshopping/cashback-rate-comparison): the best cashback for any store across Rakuten, TopCashback, BeFrugal, Capital One Shopping, Mr. Rebates and ShopBack (US, UK, AU).
+- [Rakuten Cashback Scraper](https://apify.com/smartshopping/rakuten-cashback-scraper): every Rakuten (US) store with its current rate.
+- [TopCashback Scraper](https://apify.com/smartshopping/topcashback-scraper): every TopCashback store in the US, UK and Australia with its current rate.
+- [Deal Scraper](https://apify.com/smartshopping/deal-community-scraper): the latest Slickdeals, hotukdeals and OzBargain deals, with keyword alerts.
 
 ## Support
 
