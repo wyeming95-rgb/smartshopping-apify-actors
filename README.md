@@ -1,6 +1,6 @@
 # SmartShopping Data — Apify Actors
 
-Apify Actors published under the **smartshopping** Apify account: cashback portal rates across the US, UK and Australia.
+Apify Actors published under the **Smart-Shopping-Data** Apify account ([Store profile](https://apify.com/Smart-Shopping-Data)): cashback portal rates across the US, UK and Australia.
 
 Kept separate from the SmartMoney trading Actors (`smartmoney-apify-actors`): its own Apify account, its own `APIFY_TOKEN` secret and its own workflows.
 
@@ -21,10 +21,10 @@ Kept separate from the SmartMoney trading Actors (`smartmoney-apify-actors`): it
 
 - **deploy apify actors** (`.github/workflows/deploy-apify.yml`): on every push to `main` that touches an `apify-*/` folder, tests each Actor and pushes it to Apify. The first push creates the Actor.
 - **apify setup** (`.github/workflows/apify-setup.yml`, `scripts/apify-setup.mjs`):
-  - `whoami` checks that the token belongs to `smartshopping`
+  - `whoami` checks that the token belongs to `Smart-Shopping-Data`
   - `test` runs each Actor on real data and prints the results
 
-Both need the `APIFY_TOKEN` repository secret, from the `smartshopping` Apify account.
+Both need the `APIFY_TOKEN` repository secret, from the `Smart-Shopping-Data` Apify account.
 
 ## Portals in scope
 

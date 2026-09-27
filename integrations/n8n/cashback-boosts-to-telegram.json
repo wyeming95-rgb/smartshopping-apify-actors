@@ -1,0 +1,109 @@
+{
+  "name": "Cashback boost alerts to Telegram",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Cashback boost alerts to Telegram\n\nEvery 6 hours, checks your stores on Rakuten, TopCashback, BeFrugal, Capital One Shopping, Mr. Rebates and ShopBack and sends a Telegram message for each rate increase, using the [Cashback Boost Monitor](https://apify.com/Smart-Shopping-Data/cashback-boost-monitor) Apify Actor.\n\n**Setup**\n1. Create an *HTTP Header Auth* credential: name `Authorization`, value `Bearer YOUR_APIFY_TOKEN`.\n2. Edit your store list in **Check cashback rates**. Keep it the same between runs.\n3. Connect your Telegram bot and set the chat ID in **Send to Telegram**.\n\nThe first run saves a baseline; changes are reported from the second run on. Cost: $0.01 per change reported.",
+        "height": 300,
+        "width": 460
+      },
+      "name": "Setup notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -380
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "name": "Every 6 hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/G8TC7sUTmxwNak3Nz/run-sync-get-dataset-items?timeout=900",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"merchants\": [\n    \"Nike\",\n    \"Walmart\",\n    \"Best Buy\",\n    \"Sephora\",\n    \"ASOS\",\n    \"THE ICONIC\"\n  ],\n  \"countries\": [\n    \"US\",\n    \"UK\",\n    \"AU\"\n  ],\n  \"watchlistName\": \"n8n-telegram\",\n  \"changeTypes\": [\n    \"increase\",\n    \"portal-boost\",\n    \"new\"\n  ],\n  \"minChangePoints\": 1\n}",
+        "options": {
+          "timeout": 930000
+        }
+      },
+      "name": "Check cashback rates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Apify API token (Authorization: Bearer ...)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_CHAT_ID",
+        "text": "={{ '⚡ <b>' + $json.merchant + '</b> cashback ' + ($json.changeType === 'new' ? 'now available' : 'boosted') + ' on ' + $json.portalName + ' (' + $json.country + ')\\n' + ($json.oldRateText ? $json.oldRateText + ' → ' : '') + '<b>' + $json.newRateText + '</b>\\n' + $json.url }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "name": "Send to Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Every 6 hours": {
+      "main": [
+        [
+          {
+            "node": "Check cashback rates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check cashback rates": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

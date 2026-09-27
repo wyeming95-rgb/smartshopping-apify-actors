@@ -9,7 +9,7 @@
 const API = 'https://api.apify.com/v2';
 const token = process.env.APIFY_TOKEN;
 if (!token) throw new Error('APIFY_TOKEN is not set');
-const EXPECTED_ACCOUNT = 'smartshopping';
+const EXPECTED_ACCOUNT = 'Smart-Shopping-Data';
 
 const ACTORS = [
     {

@@ -71,10 +71,10 @@ Pay per result: you are charged only for rates found. Portals that don't carry a
 
 ## Related Actors
 
-- [Cashback Boost Monitor](https://apify.com/smartshopping/cashback-boost-monitor): alerts when cashback rates for your stores go up, go down or appear.
-- [Rakuten Cashback Scraper](https://apify.com/smartshopping/rakuten-cashback-scraper): every Rakuten (US) store with its current rate.
-- [TopCashback Scraper](https://apify.com/smartshopping/topcashback-scraper): every TopCashback store in the US, UK and Australia with its current rate.
-- [Deal Scraper](https://apify.com/smartshopping/deal-community-scraper): the latest Slickdeals, hotukdeals and OzBargain deals, with keyword alerts.
+- [Cashback Boost Monitor](https://apify.com/Smart-Shopping-Data/cashback-boost-monitor): alerts when cashback rates for your stores go up, go down or appear.
+- [Rakuten Cashback Scraper](https://apify.com/Smart-Shopping-Data/rakuten-cashback-scraper): every Rakuten (US) store with its current rate.
+- [TopCashback Scraper](https://apify.com/Smart-Shopping-Data/topcashback-scraper): every TopCashback store in the US, UK and Australia with its current rate.
+- [Deal Scraper](https://apify.com/Smart-Shopping-Data/deal-community-scraper): the latest Slickdeals, hotukdeals and OzBargain deals, with keyword alerts.
 
 ## Support
 

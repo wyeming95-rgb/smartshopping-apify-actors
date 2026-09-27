@@ -1,0 +1,112 @@
+{
+  "name": "Deal alerts to Slack (Slickdeals, hotukdeals, OzBargain)",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Deal alerts to Slack\n\nEvery 30 minutes, posts **new** community deals matching your keywords to a Slack channel, using the [Deal Scraper](https://apify.com/Smart-Shopping-Data/deal-community-scraper) Apify Actor.\n\n**Setup**\n1. Create an *HTTP Header Auth* credential: name `Authorization`, value `Bearer YOUR_APIFY_TOKEN` (Apify Console → Settings → API & Integrations).\n2. Edit the keywords, sources and minimum score in **Get new deals**.\n3. Connect Slack and pick your channel in **Post to Slack**.\n\nOnly deals not sent before are returned (`onlyNew`), so each deal is posted once. Cost: $0.001 per deal returned.",
+        "height": 300,
+        "width": 460
+      },
+      "name": "Setup notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -380
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "name": "Every 30 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/7e7KW09J9d6LPGucb/run-sync-get-dataset-items?timeout=120",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"sources\": [\n    \"slickdeals-frontpage\",\n    \"hotukdeals-hot\",\n    \"ozbargain-new\"\n  ],\n  \"keywords\": [\n    \"laptop\",\n    \"lego\",\n    \"headphones\"\n  ],\n  \"minScore\": 20,\n  \"onlyNew\": true,\n  \"stateName\": \"n8n-slack-alerts\"\n}",
+        "options": {
+          "timeout": 150000
+        }
+      },
+      "name": "Get new deals",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Apify API token (Authorization: Bearer ...)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "#deals",
+          "mode": "name"
+        },
+        "text": "={{ ($json.country === 'US' ? '🇺🇸' : $json.country === 'UK' ? '🇬🇧' : '🇦🇺') + ' *' + $json.title + '*\\n' + ($json.price !== null ? '💰 ' + $json.price + ' ' + $json.currency + '  ' : '') + ($json.store ? '🏬 ' + $json.store + '  ' : '') + '📈 ' + $json.score + ' on ' + $json.site + '\\n' + $json.url }}",
+        "otherOptions": {}
+      },
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Every 30 minutes": {
+      "main": [
+        [
+          {
+            "node": "Get new deals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get new deals": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}

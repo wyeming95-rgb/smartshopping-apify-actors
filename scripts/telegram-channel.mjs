@@ -31,10 +31,13 @@ const MIN_BOOST_POINTS = 2;
 const FLAGS = { US: '🇺🇸', UK: '🇬🇧', AU: '🇦🇺' };
 const SYMBOL = { USD: '$', GBP: '£', AUD: 'A$' };
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const FOOTER = '<i>Data: <a href="https://apify.com/smartshopping">SmartShopping Data</a></i>';
+const FOOTER = '<i>Data: <a href="https://apify.com/Smart-Shopping-Data">SmartShopping Data</a></i>';
+
+// Actor IDs never change, unlike the account's username.
+const ACTOR_IDS = { 'deal-community-scraper': '7e7KW09J9d6LPGucb', 'cashback-boost-monitor': 'G8TC7sUTmxwNak3Nz' };
 
 async function runActor(actor, input, timeoutSecs = 240) {
-    const res = await fetch(`${API}/acts/smartshopping~${actor}/run-sync-get-dataset-items?timeout=${timeoutSecs}&memory=1024`, {
+    const res = await fetch(`${API}/acts/${ACTOR_IDS[actor]}/run-sync-get-dataset-items?timeout=${timeoutSecs}&memory=1024`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${apifyToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(input),

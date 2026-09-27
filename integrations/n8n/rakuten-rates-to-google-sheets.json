@@ -1,0 +1,122 @@
+{
+  "name": "Daily Rakuten cashback rates to Google Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Daily Rakuten cashback rates to Google Sheets\n\nEvery morning, appends the current cashback rate of Rakuten stores to a Google Sheet, using the [Rakuten Cashback Scraper](https://apify.com/Smart-Shopping-Data/rakuten-cashback-scraper) Apify Actor. Over time the sheet becomes a rate history you can chart.\n\n**Setup**\n1. Create an *HTTP Header Auth* credential: name `Authorization`, value `Bearer YOUR_APIFY_TOKEN`.\n2. In **Get Rakuten rates**, choose stores with `storeKeywords` or raise `maxStores` (0 = all ~4,200 stores, about 35 minutes).\n3. Create a sheet with the header row `store, rateText, rateType, rateValue, isUpTo, storeId, url, checkedAt`, then connect Google Sheets in **Append to sheet**.\n\nCost: $0.002 per store row.",
+        "height": 300,
+        "width": 460
+      },
+      "name": "Setup notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -380
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "name": "Every day at 7am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/kohDcDyVSMZK6Uuso/run-sync-get-dataset-items?timeout=300",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"maxStores\": 0,\n  \"storeKeywords\": [\n    \"nike\",\n    \"sephora\",\n    \"walmart\",\n    \"bestbuy\",\n    \"target\",\n    \"macys\",\n    \"expedia\"\n  ]\n}",
+        "options": {
+          "timeout": 330000
+        }
+      },
+      "name": "Get Rakuten rates",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "",
+          "name": "Apify API token (Authorization: Bearer ...)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "name": "Append to sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        480,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Every day at 7am": {
+      "main": [
+        [
+          {
+            "node": "Get Rakuten rates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Rakuten rates": {
+      "main": [
+        [
+          {
+            "node": "Append to sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {}
+}
