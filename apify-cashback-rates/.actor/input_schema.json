@@ -1,0 +1,41 @@
+{
+    "title": "Cashback rate comparison input",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "merchants": {
+            "title": "Stores",
+            "type": "array",
+            "description": "Store names or domains to check, e.g. Nike, ASOS, Amazon, walmart.com, THE ICONIC.",
+            "editor": "stringList",
+            "prefill": ["Nike", "ASOS", "Amazon", "Walmart"]
+        },
+        "countries": {
+            "title": "Countries",
+            "type": "array",
+            "description": "Which countries' cashback portals to check.",
+            "editor": "select",
+            "items": { "type": "string", "enum": ["US", "UK", "AU"], "enumTitles": ["United States", "United Kingdom", "Australia"] },
+            "default": ["US", "UK", "AU"]
+        },
+        "portals": {
+            "title": "Portals",
+            "type": "array",
+            "description": "Limit to specific portals. Leave empty for all portals in the chosen countries.",
+            "editor": "select",
+            "items": {
+                "type": "string",
+                "enum": ["rakuten-us", "topcashback-us", "befrugal-us", "capitalone-shopping-us", "mrrebates-us", "topcashback-uk", "topcashback-au", "shopback-au"],
+                "enumTitles": ["Rakuten (US)", "TopCashback (US)", "BeFrugal (US)", "Capital One Shopping (US)", "Mr. Rebates (US)", "TopCashback (UK)", "TopCashback (AU)", "ShopBack (AU)"]
+            },
+            "default": []
+        },
+        "includeNotListed": {
+            "title": "Include stores a portal doesn't carry",
+            "type": "boolean",
+            "description": "Also return a free row for each portal that doesn't list the store, so you can see coverage gaps.",
+            "default": false
+        }
+    },
+    "required": ["merchants"]
+}

@@ -6,6 +6,7 @@ Kept separate from the SmartMoney trading Actors (`smartmoney-apify-actors`): it
 
 | Folder | Actor | Status |
 |---|---|---|
+| `apify-cashback-rates/` | Cashback Rate Comparison | Rates for any store across US, UK and AU portals, with the best rate per country. Charge event: `cashback-rate`. |
 | `apify-portal-probe/` | Cashback portal probe (internal) | Development only: checks which portals can be fetched from Apify and where the rates live. Never published. |
 
 ## Workflows

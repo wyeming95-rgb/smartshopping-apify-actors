@@ -10,6 +10,12 @@ const EXPECTED_ACCOUNT = 'smartshopping';
 
 const ACTORS = [
     {
+        name: 'cashback-rate-comparison',
+        testInput: { merchants: ['Nike', 'ASOS', 'Amazon', 'Walmart', 'Best Buy', 'THE ICONIC', 'Marks & Spencer', 'Sephora'], includeNotListed: true },
+        printAllItems: true,
+        maxItemChars: 600,
+    },
+    {
         name: 'cashback-portal-probe',
         testInput: {},
         printAllItems: true,

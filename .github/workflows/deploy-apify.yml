@@ -26,6 +26,8 @@ jobs:
         include:
           - actor: apify-portal-probe
             actor_id: ""
+          - actor: apify-cashback-rates
+            actor_id: ""
     defaults:
       run:
         working-directory: ${{ matrix.actor }}

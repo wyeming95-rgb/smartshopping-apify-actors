@@ -1,0 +1,14 @@
+{
+  "actorSpecification": 1,
+  "name": "cashback-rate-comparison",
+  "title": "Cashback Rate Comparison — Rakuten, TopCashback, ShopBack & more",
+  "description": "Compare cashback rates for any store across Rakuten, TopCashback, BeFrugal, Capital One Shopping, Mr. Rebates and ShopBack in the US, UK and Australia. Best rate per store per country. Pay per rate found.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "output": "./output_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "dockerfile": "./Dockerfile"
+}
