@@ -16,9 +16,9 @@ test('Rakuten: rate from og:title, previous rate from the page, redirects to hom
     assert.deepEqual(portal('rakuten-us').candidates('Nike'), ['https://www.rakuten.com/nike.com', 'https://www.rakuten.com/shop/nike']);
 });
 
-test('TopCashback: rate from the meta description, not the featured-brands banner', () => {
+test('TopCashback: rate from the meta description (UK/AU) or the store block (US), never the banners', () => {
     const us = portal('topcashback-us').parse(page('https://www.topcashback.com/nike/'));
-    assert.deepEqual([us.listed, us.merchantName, us.rate.rateText, us.rate.isUpTo], [true, 'Nike', 'up to 6%', true]);
+    assert.deepEqual([us.listed, us.merchantName, us.rate.rateText, us.rate.isUpTo], [true, 'Nike', '11%', false]);
     const uk = portal('topcashback-uk').parse(page('https://www.topcashback.co.uk/asos/'));
     assert.deepEqual([uk.merchantName, uk.rate.rateValue], ['ASOS', 6]);
     const au = portal('topcashback-au').parse(page('https://www.topcashback.com.au/nike/'));
@@ -44,5 +44,19 @@ test('Mr. Rebates: store list with rates from the A-Z directory', () => {
     const stores = portal('mrrebates-us').parseDirectory(PAGES['https://www.mrrebates.com/merchants/all_merchants.asp'].html);
     assert.equal(stores.size, 3);
     assert.deepEqual(stores.get('nike'), { name: 'Nike', url: 'https://www.mrrebates.com/merchant.asp?id=5501', rate: { rateText: 'Up to 7%', rateType: 'percent', rateValue: 7, currency: null, isUpTo: true } });
-    assert.equal(stores.get('best buy').rate.rateValue, 1);
+    assert.deepEqual(stores.get('aarp').rate, { rateText: '$10.00', rateType: 'fixed', rateValue: 10, currency: 'USD', isUpTo: false });
+    assert.equal(stores.get('puma').rate.rateValue, 5);
 });
+
+test('regressions from the first live run', () => {
+    // Rakuten: "No Cash Back" stores, and unknown stores that land on the generic page.
+    const walmart = portal('rakuten-us').parse(page('https://www.rakuten.com/walmart.com'));
+    assert.deepEqual([walmart.listed, walmart.noCashback, walmart.merchantName], [true, true, 'Walmart']);
+    assert.equal(portal('rakuten-us').parse(page('https://www.rakuten.com/theiconic.com')).listed, false);
+    // TopCashback UK redirects Best Buy to Currys: not the store that was asked for.
+    assert.equal(portal('topcashback-uk').parse(page('https://www.topcashback.co.uk/best-buy/')).listed, false);
+    // Capital One Shopping: zero rewards, and a store name containing "&".
+    const ms = portal('capitalone-shopping-us').parse(page('https://capitaloneshopping.com/s/marksandspencer.com/coupon'));
+    assert.deepEqual([ms.listed, ms.noCashback, ms.merchantName], [true, true, 'Marks & Spencer']);
+});
+

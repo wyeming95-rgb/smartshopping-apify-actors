@@ -65,7 +65,7 @@ const toRow = (r) => ({
     portalName: r.portalName,
     country: r.country,
     listed: r.listed,
-    status: !r.listed ? 'not-listed' : r.paused ? 'paused' : r.rate ? 'ok' : 'rate-not-found',
+    status: !r.listed ? 'not-listed' : r.paused ? 'paused' : r.noCashback ? 'no-cashback' : r.rate ? 'ok' : 'rate-not-found',
     rateText: r.rate?.rateText ?? null,
     rateType: r.rate?.rateType ?? null,
     rateValue: r.rate?.rateValue ?? null,

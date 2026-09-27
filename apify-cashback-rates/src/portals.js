@@ -19,6 +19,9 @@ const rakuten = {
     parse({ html, finalUrl, status }) {
         if (status !== 200 || !/\/shop\//.test(pathOf(finalUrl))) return notListed;
         const og = meta(html, 'og:title') ?? '';
+        // Unknown stores fall back to Rakuten's generic "Coupons, Promo Codes & Cash Back | Rakuten" page.
+        if (!og || /\|\s*Rakuten\s*$/i.test(og) || /^Coupons, Promo Codes/i.test(og)) return notListed;
+        if (/\bNo Cash Back\b/i.test(og)) return { listed: true, merchantName: og.split(/\s+No Cash Back/i)[0].trim(), rate: null, noCashback: true };
         const rate = findCashbackRate(og, 'USD');
         if (!rate) return { listed: true, merchantName: nameBeforeRate(og), rate: null };
         const was = visibleText(html).match(new RegExp(`${rate.rateText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*cash\\s?back\\s*was\\s*((?:up to\\s*)?[\\d.]+%|\\$[\\d.]+)`, 'i'));
@@ -33,11 +36,17 @@ function topCashback(id, country, base, currency) {
             const slug = slugify(baseName(m));
             return [...new Set([`${base}/${slug}/`, `${base}/${slug.replace(/-/g, '')}/`])];
         },
-        parse({ html, finalUrl, status }) {
+        parse({ html, url, finalUrl, status }) {
             if (status !== 200 || /\|\s*Error/i.test(title(html) ?? '')) return notListed;
-            if (!/^\/[^/]+$/.test(pathOf(finalUrl))) return notListed; // redirected away from a store page
+            // Some stores redirect to another one (Best Buy -> Currys on the UK site): only the requested page counts.
+            if (pathOf(finalUrl) !== pathOf(url)) return notListed;
             const merchantName = (title(html) ?? '').split(/\s+(?:Offers|Cashback Offers|Cash Back Offers)\b/i)[0].trim() || null;
-            return { listed: true, merchantName, rate: findCashbackRate(meta(html, 'description') ?? '', currency) };
+            // UK and AU state the rate in the meta description; the US site only shows it in the store's
+            // main block, which comes after the navigation banners that advertise other stores' rates.
+            const main = html.indexOf('merch-primary-slice');
+            const rate = findCashbackRate(meta(html, 'description') ?? '', currency)
+                ?? (main === -1 ? null : findCashbackRate(visibleText(html.slice(main, main + 30_000)), currency));
+            return { listed: true, merchantName, rate };
         },
     };
 }
@@ -48,8 +57,8 @@ const befrugal = {
         const slug = slugify(baseName(m));
         return [...new Set([`https://www.befrugal.com/store/${slug.replace(/-/g, '')}/`, `https://www.befrugal.com/store/${slug}/`])];
     },
-    parse({ html, finalUrl, status }) {
-        if (status !== 200 || !/^\/store\/[^/]+$/.test(pathOf(finalUrl))) return notListed;
+    parse({ html, url, finalUrl, status }) {
+        if (status !== 200 || pathOf(finalUrl) !== pathOf(url)) return notListed;
         const t = title(html) ?? '';
         return { listed: true, merchantName: nameBeforeRate(t), rate: findCashbackRate(t, 'USD') };
     },
@@ -60,26 +69,32 @@ const capitalOneShopping = {
     candidates: (m) => [`https://capitaloneshopping.com/s/${domainOf(m)}/coupon`],
     parse({ html, status }) {
         if (status !== 200) return notListed;
-        const reward = clean(html).match(/Get (up to )?(\d+(?:\.\d+)?%|\$\s?\d+(?:\.\d+)?) back on purchases when you shop (?:on|at) ([^.<"\\]+)/i);
+        // The rewards headline, e.g. "Get 2% back on purchases when you shop on Nike."
+        const headline = clean(html.match(/data-testid="coupon-content-title"[^>]*>([^<]+)</i)?.[1] ?? '');
+        const reward = headline.match(/Get (up to )?(\d+(?:\.\d+)?%|\$\s?\d+(?:\.\d+)?) back on purchases when you shop (?:on|at) (.+?)\.?$/i);
         if (!reward) return notListed; // store page exists but the store has no rewards
-        return { listed: true, merchantName: reward[3].trim(), rate: parseRate(`${reward[1] ?? ''}${reward[2]}`, 'USD') };
+        const rate = parseRate(`${reward[1] ?? ''}${reward[2]}`, 'USD');
+        if (!rate?.rateValue) return { listed: true, merchantName: reward[3].trim(), rate: null, noCashback: true };
+        return { listed: true, merchantName: reward[3].trim(), rate };
     },
 };
 
 const mrRebates = {
     id: 'mrrebates-us', name: 'Mr. Rebates', country: 'US', currency: 'USD',
     directoryUrl: 'https://www.mrrebates.com/merchants/all_merchants.asp',
-    /** Store list: name -> { url, rate } parsed from the A-Z merchants page. */
+    /**
+     * Store list: name -> { url, rate } parsed from the A-Z merchants page, where each row is
+     * <a href="/click/nw.asp?merchant_id=N" class="StoreName">Name</a> ... <div class="... CashBackSmaller">3% Cash Back</div>.
+     */
     parseDirectory(html) {
         const stores = new Map();
-        const links = [...html.matchAll(/<a[^>]+href="(\/merchant\.asp\?id=\d+)"[^>]*>([\s\S]*?)<\/a>/gi)];
-        links.forEach((m, i) => {
+        const rows = [...html.matchAll(/<a[^>]+merchant_id=(\d+)[^>]*class="StoreName"[^>]*>([\s\S]*?)<\/a>/gi)];
+        rows.forEach((m, i) => {
             const name = clean(m[2].replace(/<[^>]+>/g, ' '));
             if (!name || stores.has(name.toLowerCase())) return;
-            // The rate sits between this store's link and the next one.
-            const end = links[i + 1]?.index ?? m.index + m[0].length + 400;
-            const after = clean(html.slice(m.index + m[0].length, Math.min(end, m.index + m[0].length + 400)).replace(/<[^>]+>/g, ' '));
-            stores.set(name.toLowerCase(), { name, url: `https://www.mrrebates.com${m[1]}`, rate: findCashbackRate(after, 'USD') });
+            const rowHtml = html.slice(m.index + m[0].length, rows[i + 1]?.index ?? m.index + m[0].length + 1500);
+            const cell = rowHtml.match(/class="[^"]*CashBackSmaller[^"]*"[^>]*>([\s\S]*?)<\/div>/i)?.[1] ?? '';
+            stores.set(name.toLowerCase(), { name, url: `https://www.mrrebates.com/merchant.asp?id=${m[1]}`, rate: findCashbackRate(clean(cell.replace(/<[^>]+>/g, ' ')), 'USD') });
         });
         return stores;
     },
