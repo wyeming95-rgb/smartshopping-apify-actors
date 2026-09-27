@@ -10,7 +10,8 @@ const botToken = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 const dryRun = !botToken || !chatId;
 // Dry runs keep their own "already posted" memory, so previewing never swallows deals the real channel should get.
-const statePrefix = dryRun ? 'telegram-dryrun' : 'telegram';
+// (v2: the first live run failed to post after marking its deals as seen, so live memory starts fresh.)
+const statePrefix = dryRun ? 'telegram-dryrun' : 'telegram-v2';
 
 // Community score a deal needs before we post it, per site (the scales differ: thumbs, temperature °, votes).
 const DEAL_FEEDS = [
@@ -47,17 +48,40 @@ async function runActor(actor, input, timeoutSecs = 240) {
     return JSON.parse(text);
 }
 
+async function telegram(method, body) {
+    const res = await fetch(`https://api.telegram.org/bot${botToken}/${method}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.ok) throw new Error(`Telegram ${method} -> HTTP ${res.status}: ${json.description ?? 'no description'}`);
+    return json.result;
+}
+
+/**
+ * Checks the bot can post to the channel before any Actor runs. The Actors remember what they returned, so a run
+ * that fetched deals and then failed to post them would lose those deals for good.
+ */
+async function checkCanPost() {
+    const me = await telegram('getMe', {});
+    let member;
+    try {
+        member = await telegram('getChatMember', { chat_id: chatId, user_id: me.id });
+    } catch (err) {
+        throw new Error(`Cannot see the channel ${chatId} as @${me.username}: ${err.message}. Check TELEGRAM_CHAT_ID and that the bot is an admin of the channel.`);
+    }
+    const canPost = member.status === 'creator' || (member.status === 'administrator' && member.can_post_messages !== false);
+    if (!canPost) throw new Error(`@${me.username} is "${member.status}" in ${chatId}, not an admin allowed to post. Add it as an admin with "Post messages".`);
+    console.log(`@${me.username} can post to ${chatId}.`);
+}
+
 async function send(html) {
     if (dryRun) {
         console.log(`--- would post ---\n${html}\n`);
         return;
     }
-    const res = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId, text: html, parse_mode: 'HTML', disable_web_page_preview: false }),
-    });
-    if (!res.ok) throw new Error(`Telegram sendMessage -> HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    await telegram('sendMessage', { chat_id: chatId, text: html, parse_mode: 'HTML', disable_web_page_preview: false });
     await new Promise((r) => setTimeout(r, 1500)); // stay well under Telegram's per-channel rate limit
 }
 
@@ -117,5 +141,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     if (!apifyToken) throw new Error('APIFY_TOKEN is not set');
     if (!modes[mode]) throw new Error(`Usage: telegram-channel.mjs <${Object.keys(modes).join('|')}>`);
     if (dryRun) console.log('TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set: dry run, nothing is posted.\n');
+    else await checkCanPost();
     await modes[mode]();
 }
