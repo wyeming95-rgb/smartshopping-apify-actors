@@ -10,8 +10,17 @@ const DEFAULT_TARGETS = [
     { portal: 'topcashback-us-nike', url: 'https://www.topcashback.com/nike/', around: 'merch-highlight__content' },
     { portal: 'topcashback-us-walmart', url: 'https://www.topcashback.com/walmart/', around: 'merch-highlight__content' },
     { portal: 'topcashback-us-sephora', url: 'https://www.topcashback.com/sephora/', around: 'merch-highlight__content' },
-]
+];
+
+const BOT_WALLS = [
+    ['cloudflare-challenge', /cf-chl|challenge-platform|Just a moment\.\.\.|cf_chl_opt/i],
+    ['perimeterx', /px-captcha|_pxAppId|perimeterx/i],
+    ['datadome', /captcha-delivery\.com|datadome/i],
+    ['akamai', /Access Denied[\s\S]{0,200}Reference #/i],
+];
 const RATE_RE = /(?:up to\s*)?\d+(?:\.\d+)?\s?%\s*(?:cash\s?back|cashback|rewards?|back)|(?:[$£]|A\$)\s?\d+(?:\.\d+)?\s*(?:cash\s?back|cashback)/gi;
+
+const { targets = DEFAULT_TARGETS, useProxy = false } = (await Actor.getInput()) ?? {};
 
 const proxyConfiguration = useProxy ? await Actor.createProxyConfiguration().catch(() => null) : null;
 
