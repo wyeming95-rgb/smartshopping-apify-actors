@@ -19,7 +19,7 @@ const ACTORS = [
         name: 'cashback-portal-probe',
         testInput: {},
         printAllItems: true,
-        maxItemChars: 6000,
+        maxItemChars: 9000,
     },
 ].filter((a) => !process.env.ONLY || process.env.ONLY.split(',').map((n) => n.trim()).includes(a.name));
 if (!ACTORS.length) throw new Error(`ONLY=${process.env.ONLY} matches no Actor`);

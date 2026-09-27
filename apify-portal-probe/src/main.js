@@ -7,21 +7,12 @@ import { gotScraping } from 'got-scraping';
 await Actor.init();
 
 const DEFAULT_TARGETS = [
-    { portal: 'rakuten-us', url: 'https://www.rakuten.com/nike.com' },
-    { portal: 'rakuten-us-all', url: 'https://www.rakuten.com/stores/all' },
-    { portal: 'topcashback-us', url: 'https://www.topcashback.com/nike/' },
-    { portal: 'befrugal-us', url: 'https://www.befrugal.com/store/nike/' },
-    { portal: 'capitalone-shopping-us', url: 'https://capitaloneshopping.com/s/nike.com/coupon' },
-    { portal: 'swagbucks-us', url: 'https://www.swagbucks.com/shop/nike-coupons' },
-    { portal: 'mrrebates-us-home', url: 'https://www.mrrebates.com/', linkPattern: 'store|merchant|rebate' },
-    { portal: 'topcashback-uk', url: 'https://www.topcashback.co.uk/asos/' },
-    { portal: 'topcashback-uk-home', url: 'https://www.topcashback.co.uk/', linkPattern: '^/[a-z0-9-]+/$' },
-    { portal: 'topcashback-au', url: 'https://www.topcashback.com.au/nike/' },
-    { portal: 'shopback-au-home', url: 'https://www.shopback.com.au/', linkPattern: '^/[a-z0-9-]+$|shopback\\.com\\.au/[a-z0-9-]+$' },
-    { portal: 'shopback-au', url: 'https://www.shopback.com.au/the-iconic' },
-    { portal: 'cashrewards-au', url: 'https://cashrewards.com.au/' },
-    { portal: 'cashrewards-au-www', url: 'https://www.cashrewards.com.au/' },
-];
+    { portal: 'topcashback-us-nike', url: 'https://www.topcashback.com/nike/', around: 'Nike' },
+    { portal: 'topcashback-us-walmart', url: 'https://www.topcashback.com/walmart/', around: 'Walmart' },
+    { portal: 'mrrebates-directory', url: 'https://www.mrrebates.com/merchants/all_merchants.asp', linkPattern: 'merchant', around: 'Cash Back' },
+    { portal: 'capitalone-ms', url: 'https://capitaloneshopping.com/s/marksandspencer.com/coupon', around: 'coupon-content-title' },
+    { portal: 'capitalone-amazon', url: 'https://capitaloneshopping.com/s/amazon.com/coupon', around: 'coupon-content-title' },
+]
 
 const { targets = DEFAULT_TARGETS, useProxy = false } = (await Actor.getInput()) ?? {};
 
@@ -80,6 +71,14 @@ function analyze(html, target) {
     // Raw markup around the first rate mentions, so class names and structure are visible.
     report.htmlAroundRates = [...html.matchAll(RATE_RE)].slice(0, 4).map((m) => html.slice(Math.max(0, m.index - 350), m.index + 120).replace(/\s+/g, ' '));
     report.textRates = [...text.matchAll(RATE_RE)].slice(0, 8).map((m) => m[0]);
+    report.metaDescription = (html.match(/<meta[^>]+name=["']description["'][^>]*>/i)?.[0] ?? '').slice(0, 400);
+    report.ogTitle = (html.match(/<meta[^>]+property=["']og:title["'][^>]*>/i)?.[0] ?? '').slice(0, 300);
+    if (target.around) {
+        // Raw markup around the first few mentions of a marker string (merchant name, test id, ...).
+        const idx = [];
+        for (let i = html.indexOf(target.around); i !== -1 && idx.length < 5; i = html.indexOf(target.around, i + 400)) idx.push(i);
+        report.htmlAroundMarker = idx.map((i) => html.slice(Math.max(0, i - 250), i + 450).replace(/\s+/g, ' '));
+    }
     if (target.linkPattern) {
         const re = new RegExp(target.linkPattern, 'i');
         report.sampleLinks = [...new Set([...html.matchAll(/href="([^"#?]+)"/gi)].map((m) => m[1]).filter((h) => re.test(h)))].slice(0, 20);
