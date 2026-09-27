@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { PORTALS } from '../src/portals.js';
+import { PORTALS } from '../src/core/portals.js';
 import { PAGES } from './fixtures/pages.js';
 
 const portal = (id) => PORTALS.find((p) => p.id === id);

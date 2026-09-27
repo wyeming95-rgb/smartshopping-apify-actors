@@ -1,0 +1,124 @@
+{
+    "title": "Cashback boost monitor input",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "merchants": {
+            "title": "Stores to watch",
+            "type": "array",
+            "description": "Store names or domains, e.g. Nike, ASOS, walmart.com. Keep the list the same between runs so changes can be compared.",
+            "editor": "stringList",
+            "prefill": [
+                "Nike",
+                "ASOS",
+                "Walmart",
+                "Best Buy",
+                "Sephora"
+            ]
+        },
+        "countries": {
+            "title": "Countries",
+            "type": "array",
+            "description": "Which countries' cashback portals to check.",
+            "editor": "select",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "US",
+                    "UK",
+                    "AU"
+                ],
+                "enumTitles": [
+                    "United States",
+                    "United Kingdom",
+                    "Australia"
+                ]
+            },
+            "default": [
+                "US",
+                "UK",
+                "AU"
+            ]
+        },
+        "portals": {
+            "title": "Portals",
+            "type": "array",
+            "description": "Limit to specific portals. Leave empty for all portals in the chosen countries.",
+            "editor": "select",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "rakuten-us",
+                    "topcashback-us",
+                    "befrugal-us",
+                    "capitalone-shopping-us",
+                    "mrrebates-us",
+                    "topcashback-uk",
+                    "topcashback-au",
+                    "shopback-au"
+                ],
+                "enumTitles": [
+                    "Rakuten (US)",
+                    "TopCashback (US)",
+                    "BeFrugal (US)",
+                    "Capital One Shopping (US)",
+                    "Mr. Rebates (US)",
+                    "TopCashback (UK)",
+                    "TopCashback (AU)",
+                    "ShopBack (AU)"
+                ]
+            },
+            "default": []
+        },
+        "watchlistName": {
+            "title": "Watchlist name",
+            "type": "string",
+            "description": "Rates are remembered per watchlist between runs. Use a different name for each separate list or schedule.",
+            "editor": "textfield",
+            "default": "default"
+        },
+        "changeTypes": {
+            "title": "Changes to report",
+            "type": "array",
+            "description": "increase and decrease compare with the previous run; portal-boost is a boost the portal itself flags (\"was 2%\"); new is a store newly offering cashback; removed is a store that stopped; changed is a switch between % and fixed amounts.",
+            "editor": "select",
+            "items": {
+                "type": "string",
+                "enum": [
+                    "increase",
+                    "portal-boost",
+                    "new",
+                    "decrease",
+                    "removed",
+                    "changed"
+                ],
+                "enumTitles": [
+                    "Rate increased",
+                    "Boost flagged by the portal",
+                    "Newly offering cashback",
+                    "Rate decreased",
+                    "Cashback removed",
+                    "Switched between % and fixed"
+                ]
+            },
+            "default": [
+                "increase",
+                "portal-boost",
+                "new",
+                "decrease",
+                "removed",
+                "changed"
+            ]
+        },
+        "minChangePoints": {
+            "title": "Minimum change",
+            "type": "number",
+            "description": "Ignore increases and decreases smaller than this many percentage points (or currency units for fixed amounts).",
+            "default": 0,
+            "minimum": 0
+        }
+    },
+    "required": [
+        "merchants"
+    ]
+}

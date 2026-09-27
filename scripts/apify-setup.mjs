@@ -27,6 +27,25 @@ const ACTORS = [
         event: { name: 'cashback-rate', title: 'Cashback rate', description: 'One cashback rate found for a store on a portal.', priceUsd: 0.003 },
     },
     {
+        name: 'cashback-boost-monitor',
+        // Two runs on the same watchlist: a baseline, then a comparison (usually few or no changes minutes apart).
+        testInput: [
+            { merchants: ['Nike', 'ASOS', 'Walmart', 'Best Buy', 'Sephora', 'THE ICONIC'], watchlistName: 'setup-test' },
+            { merchants: ['Nike', 'ASOS', 'Walmart', 'Best Buy', 'Sephora', 'THE ICONIC'], watchlistName: 'setup-test' },
+        ],
+        allowEmpty: true,
+        printAllItems: true,
+        maxItemChars: 700,
+        listing: {
+            title: 'Cashback Boost Monitor — Rate Change Alerts',
+            description: 'Get alerted when cashback rates change for your stores on Rakuten, TopCashback, BeFrugal, Capital One Shopping, Mr. Rebates and ShopBack (US, UK, AU): boosts, cuts and new listings. Schedule it; pay only per change.',
+            seoTitle: 'Cashback Rate Change Alerts | Rakuten & TopCashback',
+            seoDescription: 'Scheduled alerts when cashback rates change on Rakuten, TopCashback, ShopBack and more: boosts, cuts and new stores. US, UK, AU.',
+            categories: ['ECOMMERCE', 'AI', 'DEVELOPER_TOOLS'],
+        },
+        event: { name: 'rate-change', title: 'Rate change', description: 'One cashback rate change reported for a store on a portal.', priceUsd: 0.01 },
+    },
+    {
         name: 'cashback-portal-probe',
         testInput: {},
         printAllItems: true,
@@ -90,7 +109,12 @@ async function test() {
         const log = await api(`/logs/${r.id}`);
         const interesting = String(log).split('\n').filter((l) => /WARN|ERROR|Error|failed|Done:/.test(l));
         console.log('--- log highlights ---\n' + interesting.slice(-40).join('\n'));
-        if (r.status !== 'SUCCEEDED' || items.length === 0) failures++;
+        // Some Actors (e.g. the boost monitor) legitimately return nothing when nothing changed.
+        if (r.status !== 'SUCCEEDED' || (items.length === 0 && !a.allowEmpty)) failures++;
+        try {
+            const summary = await api(`/key-value-stores/${r.defaultKeyValueStoreId}/records/SUMMARY`);
+            console.log('SUMMARY', JSON.stringify(summary).slice(0, 1500));
+        } catch { /* no summary record */ }
     }
     console.log(`\n${failures ? `❌ ${failures} Actor run(s) failed or returned nothing` : '✅ all Actors returned data'}`);
     if (failures) process.exitCode = 1;

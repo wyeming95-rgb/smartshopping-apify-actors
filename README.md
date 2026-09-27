@@ -7,7 +7,12 @@ Kept separate from the SmartMoney trading Actors (`smartmoney-apify-actors`): it
 | Folder | Actor | Status |
 |---|---|---|
 | `apify-cashback-rates/` | Cashback Rate Comparison | Rates for any store across US, UK and AU portals, with the best rate per country. Charge event: `cashback-rate`. |
+| `apify-cashback-boost-monitor/` | Cashback Boost Monitor | Scheduled alerts on cashback rate changes (boosts, cuts, new stores) per watchlist. Charge event: `rate-change`. |
 | `apify-portal-probe/` | Cashback portal probe (internal) | Development only: checks which portals can be fetched from Apify and where the rates live. Never published. |
+
+## Shared code
+
+`shared/cashback-core/` holds the portal adapters used by the cashback Actors. Each Actor keeps a copy in `src/core/` (Apify builds each Actor from its own folder); run `node scripts/sync-core.mjs` after editing the shared folder. Each Actor's `core-sync.test.js` fails if its copy drifts.
 
 ## Workflows
 

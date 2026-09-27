@@ -1,0 +1,14 @@
+{
+  "actorSpecification": 1,
+  "name": "cashback-boost-monitor",
+  "title": "Cashback Boost Monitor \u2014 Rate Change Alerts",
+  "description": "Get alerted when cashback rates change for your stores on Rakuten, TopCashback, BeFrugal, Capital One Shopping, Mr. Rebates and ShopBack (US, UK, AU): boosts, cuts and new listings. Schedule it; pay only per change.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "output": "./output_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "dockerfile": "./Dockerfile"
+}

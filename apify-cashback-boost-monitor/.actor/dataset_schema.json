@@ -1,0 +1,59 @@
+{
+    "actorSpecification": 1,
+    "fields": {},
+    "views": {
+        "overview": {
+            "title": "Cashback rate changes",
+            "transformation": {
+                "fields": [
+                    "merchant",
+                    "country",
+                    "portalName",
+                    "changeType",
+                    "oldRateText",
+                    "newRateText",
+                    "changePoints",
+                    "previousCheckAt",
+                    "url",
+                    "checkedAt"
+                ]
+            },
+            "display": {
+                "component": "table",
+                "properties": {
+                    "merchant": {
+                        "label": "Store"
+                    },
+                    "portalName": {
+                        "label": "Portal"
+                    },
+                    "changeType": {
+                        "label": "Change"
+                    },
+                    "oldRateText": {
+                        "label": "Was"
+                    },
+                    "newRateText": {
+                        "label": "Now"
+                    },
+                    "changePoints": {
+                        "label": "Change (pts)",
+                        "format": "number"
+                    },
+                    "previousCheckAt": {
+                        "label": "Previous check",
+                        "format": "date"
+                    },
+                    "url": {
+                        "label": "Store page",
+                        "format": "link"
+                    },
+                    "checkedAt": {
+                        "label": "Checked",
+                        "format": "date"
+                    }
+                }
+            }
+        }
+    }
+}

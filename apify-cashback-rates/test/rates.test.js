@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { domainOf, findCashbackRate, parseRate, slugify, baseName } from '../src/rates.js';
+import { domainOf, findCashbackRate, parseRate, slugify, baseName } from '../src/core/rates.js';
 
 test('parseRate handles percent, fixed amounts, "up to" and "<"', () => {
     assert.deepEqual(parseRate('Up to 8% Cash Back'), { rateText: 'Up to 8%', rateType: 'percent', rateValue: 8, currency: null, isUpTo: true });
