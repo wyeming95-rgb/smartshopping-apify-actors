@@ -6,12 +6,17 @@ import { gotScraping } from 'got-scraping';
 
 await Actor.init();
 
+// count: regexes whose total and unique first-group matches are reported (e.g. how many stores a directory page holds).
+const RAKUTEN_COUNT = ['"merchantname_text":"([^"]+)"', '"store_id":(\\d+)', '"currentreward_rewardtext":"([^"]+)"'];
 const DEFAULT_TARGETS = [
-    { portal: 'rakuten-all', url: 'https://www.rakuten.com/stores/all', around: 'Sephora', linkPattern: '^/shop/[a-z0-9-]+$|rakuten\\.com/shop/' },
-    { portal: 'rakuten-all-page2', url: 'https://www.rakuten.com/stores/all?page=2', linkPattern: '^/shop/' },
-    { portal: 'topcashback-us-az', url: 'https://www.topcashback.com/a-z/', linkPattern: '^/[a-z0-9-]+/$|/a-z/' },
-    { portal: 'topcashback-uk-az', url: 'https://www.topcashback.co.uk/a-z/', linkPattern: '/a-z/' },
-    { portal: 'shopback-au-all', url: 'https://www.shopback.com.au/all-stores', around: 'THE ICONIC', linkPattern: 'all-stores|^/[a-z0-9-]+$' },
+    { portal: 'rakuten-all', url: 'https://www.rakuten.com/stores/all', count: RAKUTEN_COUNT, linkPattern: 'stores/all|page=|letter=' },
+    { portal: 'rakuten-all-page2', url: 'https://www.rakuten.com/stores/all?page=2', count: RAKUTEN_COUNT },
+    { portal: 'rakuten-robots', url: 'https://www.rakuten.com/robots.txt', head: 2500 },
+    { portal: 'topcashback-us-robots', url: 'https://www.topcashback.com/robots.txt', head: 2500 },
+    { portal: 'topcashback-uk-robots', url: 'https://www.topcashback.co.uk/robots.txt', head: 2500 },
+    { portal: 'topcashback-us-home', url: 'https://www.topcashback.com/', linkPattern: 'a-?z|all|stores|merchants|categor', count: ['href="/([a-z0-9-]+)/"'] },
+    { portal: 'shopback-au-all', url: 'https://www.shopback.com.au/all--stores', count: ['data-merchant-id="(\\d+)"', 'data-max-cashback-rate="([^"]+)"'], linkPattern: 'page=|all--stores' },
+    { portal: 'shopback-au-robots', url: 'https://www.shopback.com.au/robots.txt', head: 2500 },
 ]
 
 const BOT_WALLS = [
@@ -82,6 +87,14 @@ function analyze(html, target) {
         for (let i = html.indexOf(target.around); i !== -1 && idx.length < 5; i = html.indexOf(target.around, i + 400)) idx.push(i);
         report.htmlAroundMarker = idx.map((i) => html.slice(Math.max(0, i - 100), i + 1500).replace(/\s+/g, ' '));
     }
+    if (target.count) {
+        report.counts = Object.fromEntries(target.count.map((pattern) => {
+            const found = [...html.matchAll(new RegExp(pattern, 'g'))].map((m) => m[1] ?? m[0]);
+            const unique = [...new Set(found)];
+            return [pattern, { total: found.length, unique: unique.length, first: unique.slice(0, 12), last: unique.slice(-6) }];
+        }));
+    }
+    if (target.head) report.head = html.slice(0, target.head);
     if (target.linkPattern) {
         const re = new RegExp(target.linkPattern, 'i');
         report.sampleLinks = [...new Set([...html.matchAll(/href="([^"#?]+)"/gi)].map((m) => m[1]).filter((h) => re.test(h)))].slice(0, 20);
