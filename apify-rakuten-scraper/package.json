@@ -1,0 +1,17 @@
+{
+  "name": "rakuten-cashback-scraper",
+  "version": "0.1.0",
+  "description": "Scrapes Rakuten (US) cash back rates for every store in its directory.",
+  "type": "module",
+  "main": "src/main.js",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "node --test test/*.test.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "apify": "^3.7.2",
+    "got-scraping": "^4.2.1"
+  }
+}

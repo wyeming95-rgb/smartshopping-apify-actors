@@ -1,0 +1,26 @@
+{
+    "actorSpecification": 1,
+    "fields": {},
+    "views": {
+        "overview": {
+            "title": "Rakuten cash back rates",
+            "transformation": {
+                "fields": ["store", "rateText", "rateType", "rateValue", "isUpTo", "status", "storeId", "url", "checkedAt"]
+            },
+            "display": {
+                "component": "table",
+                "properties": {
+                    "store": { "label": "Store" },
+                    "rateText": { "label": "Cash back" },
+                    "rateType": { "label": "Type" },
+                    "rateValue": { "label": "Value", "format": "number" },
+                    "isUpTo": { "label": "Up to", "format": "boolean" },
+                    "status": { "label": "Status" },
+                    "storeId": { "label": "Rakuten ID" },
+                    "url": { "label": "Store page", "format": "link" },
+                    "checkedAt": { "label": "Checked", "format": "date" }
+                }
+            }
+        }
+    }
+}

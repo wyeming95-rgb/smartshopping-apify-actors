@@ -46,6 +46,19 @@ const ACTORS = [
         event: { name: 'rate-change', title: 'Rate change', description: 'One cashback rate change reported for a store on a portal.', priceUsd: 0.01 },
     },
     {
+        name: 'rakuten-cashback-scraper',
+        testInput: { maxStores: 60 },
+        maxItemChars: 400,
+        listing: {
+            title: 'Rakuten Cashback Scraper — All Store Rates',
+            description: 'Scrape cash back rates for every store on Rakuten (US): store name, rate, % or fixed amount, store ID and link. Filter by keyword or minimum rate. Pay per store.',
+            seoTitle: 'Rakuten Cash Back Rates Scraper & API | All Stores',
+            seoDescription: 'Scrape current cash back rates for all ~3,500 Rakuten (US) stores: rate, % or fixed, store ID and link. Export JSON, CSV or Excel.',
+            categories: ['ECOMMERCE', 'AI', 'DEVELOPER_TOOLS'],
+        },
+        event: { name: 'store-rate', title: 'Store rate', description: 'One Rakuten store with its current cash back rate.', priceUsd: 0.002 },
+    },
+    {
         name: 'cashback-portal-probe',
         testInput: {},
         printAllItems: true,

@@ -1,0 +1,14 @@
+{
+  "actorSpecification": 1,
+  "name": "rakuten-cashback-scraper",
+  "title": "Rakuten Cashback Scraper — All Store Rates",
+  "description": "Scrape cash back rates for every store on Rakuten (US): store name, rate, % or fixed amount, store ID and link. Filter by keyword or minimum rate. Pay per store.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "output": "./output_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "dockerfile": "./Dockerfile"
+}

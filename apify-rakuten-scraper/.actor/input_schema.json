@@ -1,0 +1,35 @@
+{
+    "title": "Rakuten cashback scraper input",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "maxStores": {
+            "title": "Maximum stores to check",
+            "type": "integer",
+            "description": "How many stores from Rakuten's directory to check, in directory order. Set 0 to check every store (about 3,500; takes roughly 25 minutes).",
+            "default": 100,
+            "minimum": 0,
+            "prefill": 100
+        },
+        "storeKeywords": {
+            "title": "Only stores matching",
+            "type": "array",
+            "description": "Only check stores whose Rakuten name contains one of these words, e.g. nike, hotel, beauty. Leave empty for all stores.",
+            "editor": "stringList",
+            "default": []
+        },
+        "minRatePercent": {
+            "title": "Minimum cash back (%)",
+            "type": "number",
+            "description": "Only save stores paying at least this percentage. Stores with a fixed amount (e.g. $25) are always saved.",
+            "default": 0,
+            "minimum": 0
+        },
+        "includeNoCashback": {
+            "title": "Include stores without cash back",
+            "type": "boolean",
+            "description": "Also save stores that are listed on Rakuten but currently pay no cash back, or whose rate could not be read.",
+            "default": false
+        }
+    }
+}
