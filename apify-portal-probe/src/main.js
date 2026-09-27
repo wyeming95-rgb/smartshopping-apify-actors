@@ -7,16 +7,17 @@ import { gotScraping } from 'got-scraping';
 await Actor.init();
 
 // count: regexes whose total and unique first-group matches are reported (e.g. how many stores a directory page holds).
-const RAKUTEN_COUNT = ['"merchantname_text":"([^"]+)"', '"store_id":(\\d+)', '"currentreward_rewardtext":"([^"]+)"'];
+const LOC = ['<loc>([^<]+)</loc>'];
 const DEFAULT_TARGETS = [
-    { portal: 'rakuten-all', url: 'https://www.rakuten.com/stores/all', count: RAKUTEN_COUNT, linkPattern: 'stores/all|page=|letter=' },
-    { portal: 'rakuten-all-page2', url: 'https://www.rakuten.com/stores/all?page=2', count: RAKUTEN_COUNT },
-    { portal: 'rakuten-robots', url: 'https://www.rakuten.com/robots.txt', head: 2500 },
-    { portal: 'topcashback-us-robots', url: 'https://www.topcashback.com/robots.txt', head: 2500 },
-    { portal: 'topcashback-uk-robots', url: 'https://www.topcashback.co.uk/robots.txt', head: 2500 },
-    { portal: 'topcashback-us-home', url: 'https://www.topcashback.com/', linkPattern: 'a-?z|all|stores|merchants|categor', count: ['href="/([a-z0-9-]+)/"'] },
-    { portal: 'shopback-au-all', url: 'https://www.shopback.com.au/all--stores', count: ['data-merchant-id="(\\d+)"', 'data-max-cashback-rate="([^"]+)"'], linkPattern: 'page=|all--stores' },
-    { portal: 'shopback-au-robots', url: 'https://www.shopback.com.au/robots.txt', head: 2500 },
+    // Where does the full store list live? Count every shape of store reference in the 1.7 MB page.
+    { portal: 'rakuten-all', url: 'https://www.rakuten.com/stores/all', count: ['rakuten\\.com/([a-z0-9-]+)_\\d+-xfas', '"/shop/([a-z0-9-]+)"', '"(?:name|storeName|merchantName|displayName)":"([^"]{2,60})"', '"__typename":"([A-Za-z]+)"', '"reward_text":"([^"]+)"', '"slug(?:Name)?":"([^"]+)"'] },
+    { portal: 'rakuten-robots', url: 'https://www.rakuten.com/robots.txt', count: ['Sitemap: (\\S+)'] },
+    { portal: 'rakuten-sitemap', url: 'https://www.rakuten.com/sitemap.xml', count: LOC, head: 800 },
+    { portal: 'topcashback-us-sitemap', url: 'https://www.topcashback.com/sitemap.xml', count: LOC, head: 800 },
+    { portal: 'topcashback-uk-sitemap', url: 'https://www.topcashback.co.uk/sitemap.xml', count: LOC, head: 800 },
+    { portal: 'topcashback-au-sitemap', url: 'https://www.topcashback.com.au/sitemap.xml', count: LOC, head: 800 },
+    { portal: 'topcashback-us-category', url: 'https://www.topcashback.com/category/fashion/', count: ['href="/([a-z0-9-]+)/"', '(?:Up to )?[$\\d.]+%? Cash Back'], around: 'Cash Back', linkPattern: 'page|sort|all' },
+    { portal: 'shopback-au-sitemap', url: 'https://www.shopback.com.au/sitemap.xml', count: LOC, head: 800 },
 ]
 
 const BOT_WALLS = [
