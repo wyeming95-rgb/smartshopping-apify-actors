@@ -8,14 +8,17 @@ await Actor.init();
 
 // count: regexes whose total and unique first-group matches are reported (e.g. how many stores a directory page holds).
 const LOC = ['<loc>([^<]+)</loc>'];
-const TOP_LEVEL = (host) => [`<loc>https://${host.replace(/\./g, '\\.')}/([a-z0-9-]+)/?</loc>`, `<loc>https://${host.replace(/\./g, '\\.')}/([a-z0-9-]+)/reviews/?</loc>`, `<loc>https://${host.replace(/\./g, '\\.')}/([a-z0-9-]+)/[a-z0-9-]+/?</loc>`];
+const ITEMS = ['<item>', '<entry>', '<title>(?:<!\\[CDATA\\[)?([^<\\]]{3,120})'];
 const DEFAULT_TARGETS = [
-    // How many top-level pages are there, and how many have a /reviews/ page?
-    { portal: 'topcashback-us-sitemap', url: 'https://www.topcashback.com/sitemap.xml', count: TOP_LEVEL('www.topcashback.com') },
-    { portal: 'topcashback-uk-sitemap', url: 'https://www.topcashback.co.uk/sitemap.xml', count: TOP_LEVEL('www.topcashback.co.uk') },
-    { portal: 'topcashback-au-sitemap', url: 'https://www.topcashback.com.au/sitemap.xml', count: TOP_LEVEL('www.topcashback.com.au') },
-    // Is a well-known US store without a reviews page a normal store page?
-    { portal: 'topcashback-us-target', url: 'https://www.topcashback.com/target/' },
+    // Deal communities: RSS feeds and crawl rules.
+    { portal: 'slickdeals-robots', url: 'https://slickdeals.net/robots.txt', count: ['(?:Crawl-delay|Sitemap): *(\\S+)', 'Disallow: *(\\S*(?:rss|newsearch|forums)\\S*)'] },
+    { portal: 'slickdeals-frontpage-rss', url: 'https://slickdeals.net/newsearch.php?mode=frontpage&searcharea=deals&searchin=first&rss=1', count: ITEMS, head: 3000 },
+    { portal: 'slickdeals-popular-rss', url: 'https://feeds.feedburner.com/SlickdealsnetFP', count: ITEMS, head: 1500 },
+    { portal: 'hotukdeals-robots', url: 'https://www.hotukdeals.com/robots.txt', count: ['(?:Crawl-delay|Sitemap): *(\\S+)', 'Disallow: *(\\S*rss\\S*)'] },
+    { portal: 'hotukdeals-hot-rss', url: 'https://www.hotukdeals.com/rss/hot', count: ITEMS, head: 3000 },
+    { portal: 'hotukdeals-new-rss', url: 'https://www.hotukdeals.com/rss/new', count: ITEMS, head: 800 },
+    { portal: 'ozbargain-robots', url: 'https://www.ozbargain.com.au/robots.txt', count: ['(?:Crawl-delay|Sitemap): *(\\S+)', 'Disallow: *(\\S*(?:feed|rss)\\S*)'] },
+    { portal: 'ozbargain-deals-feed', url: 'https://www.ozbargain.com.au/deals/feed', count: ITEMS, head: 3000 },
 ]
 
 const BOT_WALLS = [
