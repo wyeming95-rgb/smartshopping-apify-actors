@@ -69,7 +69,11 @@ async function checkCanPost() {
     try {
         member = await telegram('getChatMember', { chat_id: chatId, user_id: me.id });
     } catch (err) {
-        throw new Error(`Cannot see the channel ${chatId} as @${me.username}: ${err.message}. Check TELEGRAM_CHAT_ID and that the bot is an admin of the channel.`);
+        // Telegram answers "member list is inaccessible" when the bot can see the channel but is not one of its admins.
+        const hint = /member list is inaccessible/i.test(err.message)
+            ? `@${me.username} is not an admin of ${chatId}. In Telegram: channel → Edit → Administrators → Add Admin → ${me.username}, with "Post messages" on.`
+            : `Check that TELEGRAM_CHAT_ID is the channel's @handle and that @${me.username} is one of its admins.`;
+        throw new Error(`Cannot post to the channel yet (${err.message}). ${hint}`);
     }
     const canPost = member.status === 'creator' || (member.status === 'administrator' && member.can_post_messages !== false);
     if (!canPost) throw new Error(`@${me.username} is "${member.status}" in ${chatId}, not an admin allowed to post. Add it as an admin with "Post messages".`);
