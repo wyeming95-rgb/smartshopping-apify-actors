@@ -1,0 +1,14 @@
+{
+  "actorSpecification": 1,
+  "name": "topcashback-scraper",
+  "title": "TopCashback Scraper — All Store Rates (US, UK, AU)",
+  "description": "Scrape cashback rates for every store on TopCashback in the US, UK and Australia: store, rate, % or fixed amount, currency and link. Filter by keyword or minimum rate. Pay per store.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "output": "./output_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "dockerfile": "./Dockerfile"
+}

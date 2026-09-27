@@ -9,6 +9,7 @@ Kept separate from the SmartMoney trading Actors (`smartmoney-apify-actors`): it
 | `apify-cashback-rates/` | Cashback Rate Comparison | Rates for any store across US, UK and AU portals, with the best rate per country. Charge event: `cashback-rate`. |
 | `apify-cashback-boost-monitor/` | Cashback Boost Monitor | Scheduled alerts on cashback rate changes (boosts, cuts, new stores) per watchlist. Charge event: `rate-change`. |
 | `apify-rakuten-scraper/` | Rakuten Cashback Scraper | Every Rakuten (US) store with its current rate, from Rakuten's store sitemap. Charge event: `store-rate`. |
+| `apify-topcashback-scraper/` | TopCashback Scraper | Every TopCashback store in the US, UK and AU with its current rate, from each site's sitemap. Charge event: `store-rate`. |
 | `apify-portal-probe/` | Cashback portal probe (internal) | Development only: checks which portals can be fetched from Apify and where the rates live. Never published. |
 
 ## Shared code

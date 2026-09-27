@@ -1,0 +1,27 @@
+{
+    "actorSpecification": 1,
+    "fields": {},
+    "views": {
+        "overview": {
+            "title": "TopCashback rates",
+            "transformation": {
+                "fields": ["store", "country", "rateText", "rateType", "rateValue", "currency", "isUpTo", "status", "url", "checkedAt"]
+            },
+            "display": {
+                "component": "table",
+                "properties": {
+                    "store": { "label": "Store" },
+                    "country": { "label": "Country" },
+                    "rateText": { "label": "Cashback" },
+                    "rateType": { "label": "Type" },
+                    "rateValue": { "label": "Value", "format": "number" },
+                    "currency": { "label": "Currency" },
+                    "isUpTo": { "label": "Up to", "format": "boolean" },
+                    "status": { "label": "Status" },
+                    "url": { "label": "Store page", "format": "link" },
+                    "checkedAt": { "label": "Checked", "format": "date" }
+                }
+            }
+        }
+    }
+}

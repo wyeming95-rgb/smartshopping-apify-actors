@@ -1,11 +1,11 @@
 import { Actor, log } from 'apify';
+import { isFetchFailure, keepRow, scrapeDirectory } from './core/directory-run.js';
 import { fetchPage, fetchPageHead } from './core/http.js';
 import { PORTALS } from './core/portals.js';
 import { SITEMAP_URL, filterStores, storeIdOf, storeUrls } from './directory.js';
 
 // Pay-per-event name; must match the event configured in the Actor's monetization settings.
 const RESULT_EVENT = 'store-rate';
-const CONCURRENCY = 4; // requests still go out at most one per 400 ms (see core/http.js)
 const rakuten = PORTALS.find((p) => p.id === 'rakuten-us');
 
 await Actor.init();
@@ -24,28 +24,16 @@ const matching = filterStores(all, storeKeywords);
 const queue = maxStores > 0 ? matching.slice(0, maxStores) : matching;
 log.info(`${all.length} stores in Rakuten's sitemap, ${matching.length} match, checking ${queue.length}`);
 
-const chargingManager = Actor.getChargingManager();
-const counts = { checked: 0, withCashback: 0, noCashback: 0, notListed: 0, rateNotFound: 0, errors: 0, pushed: 0 };
-const top = [];
-let stopped = false;
-
 async function checkStore({ slug, url }) {
+    // Store pages are ~2 MB, but the rate is in the og:title in <head>.
     const page = await fetchPageHead(url);
-    counts.checked++;
-    if (page.status === 0 || page.status === 403 || page.status === 429 || page.status >= 500) {
-        counts.errors++;
+    if (isFetchFailure(page)) {
         log.warning(`${slug}: ${page.error ?? `HTTP ${page.status}`}`);
-        return null;
+        return { status: 'error' };
     }
     const result = rakuten.parse(page);
-    if (!result.listed) {
-        counts.notListed++;
-        return null;
-    }
+    if (!result.listed) return { status: 'not-listed' };
     const rate = result.rate;
-    if (result.noCashback) counts.noCashback++;
-    else if (rate) counts.withCashback++;
-    else counts.rateNotFound++;
     return {
         store: result.merchantName,
         slug,
@@ -54,48 +42,14 @@ async function checkStore({ slug, url }) {
         rateText: rate?.rateText ?? null,
         rateType: rate?.rateType ?? null,
         rateValue: rate?.rateValue ?? null,
-        currency: rate?.currency ?? null,
+        currency: rate?.currency ?? 'USD',
         isUpTo: rate?.isUpTo ?? null,
         url: page.finalUrl ?? url,
         checkedAt: new Date().toISOString(),
     };
 }
 
-const wanted = (row) => row && (row.status === 'ok'
-    ? !(minRatePercent > 0 && row.rateType === 'percent' && row.rateValue < minRatePercent)
-    : includeNoCashback);
-
-// Pushes go one at a time so the cost limit is checked before every charge, even with parallel fetches.
-let pushing = Promise.resolve();
-const save = (row) => {
-    pushing = pushing.then(async () => {
-        if (stopped) return;
-        const { eventChargeLimitReached } = await Actor.pushData(row, RESULT_EVENT);
-        counts.pushed++;
-        if (row.rateType === 'percent') top.push(row);
-        if (eventChargeLimitReached || chargingManager.calculateMaxEventChargeCountWithinLimit(RESULT_EVENT) <= 0) {
-            log.info('Maximum cost per run reached — stopping early.');
-            stopped = true;
-        }
-    });
-    return pushing;
-};
-
-let next = 0;
-async function worker() {
-    while (!stopped && next < queue.length) {
-        const row = await checkStore(queue[next++]);
-        if (wanted(row)) await save(row);
-    }
-}
-await Promise.all(Array.from({ length: CONCURRENCY }, worker));
-
-await Actor.setValue('SUMMARY', {
-    storesInSitemap: all.length,
-    storesMatching: matching.length,
-    ...counts,
-    stoppedAtCostLimit: stopped,
-    topPercentRates: top.sort((a, b) => b.rateValue - a.rateValue).slice(0, 15).map((r) => `${r.store}: ${r.rateText}`),
-});
-log.info(`Done: ${counts.pushed} stores saved (${counts.withCashback} with cash back, ${counts.notListed} no longer listed, ${counts.errors} errors).`);
+const summary = await scrapeDirectory({ stores: queue, check: checkStore, keep: keepRow({ minRatePercent, includeNoCashback }), event: RESULT_EVENT });
+await Actor.setValue('SUMMARY', { storesInSitemap: all.length, storesMatching: matching.length, ...summary });
+log.info(`Done: ${summary.saved} stores saved (${summary.withCashback} with cash back, ${summary.notListed} no longer listed, ${summary.errors} errors).`);
 await Actor.exit();

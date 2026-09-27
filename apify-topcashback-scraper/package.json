@@ -1,0 +1,17 @@
+{
+  "name": "topcashback-scraper",
+  "version": "0.1.0",
+  "description": "Scrapes TopCashback cashback rates for every store in the US, UK and Australia.",
+  "type": "module",
+  "main": "src/main.js",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "node --test test/*.test.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "apify": "^3.7.2",
+    "got-scraping": "^4.2.1"
+  }
+}

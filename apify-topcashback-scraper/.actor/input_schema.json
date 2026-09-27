@@ -1,0 +1,48 @@
+{
+    "title": "TopCashback scraper input",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "countries": {
+            "title": "Countries",
+            "type": "array",
+            "description": "Which TopCashback sites to scrape.",
+            "editor": "select",
+            "items": {
+                "type": "string",
+                "enum": ["US", "UK", "AU"],
+                "enumTitles": ["United States (topcashback.com)", "United Kingdom (topcashback.co.uk)", "Australia (topcashback.com.au)"]
+            },
+            "default": ["US", "UK", "AU"],
+            "prefill": ["US", "UK", "AU"]
+        },
+        "maxStores": {
+            "title": "Maximum stores per country",
+            "type": "integer",
+            "description": "How many stores to check in each country, in directory order. Set 0 to check every store (thousands per country; a full US run takes about 45 minutes).",
+            "default": 100,
+            "minimum": 0,
+            "prefill": 100
+        },
+        "storeKeywords": {
+            "title": "Only stores matching",
+            "type": "array",
+            "description": "Only check stores whose TopCashback name contains one of these words, e.g. nike, hotel, asos. Leave empty for all stores.",
+            "editor": "stringList",
+            "default": []
+        },
+        "minRatePercent": {
+            "title": "Minimum cashback (%)",
+            "type": "number",
+            "description": "Only save stores paying at least this percentage. Stores with a fixed amount (e.g. £20) are always saved.",
+            "default": 0,
+            "minimum": 0
+        },
+        "includeNoCashback": {
+            "title": "Include stores without a readable rate",
+            "type": "boolean",
+            "description": "Also save store pages where no cashback rate could be read.",
+            "default": false
+        }
+    }
+}

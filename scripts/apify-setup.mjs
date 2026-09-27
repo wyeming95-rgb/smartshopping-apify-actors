@@ -59,6 +59,19 @@ const ACTORS = [
         event: { name: 'store-rate', title: 'Store rate', description: 'One Rakuten store with its current cash back rate.', priceUsd: 0.002 },
     },
     {
+        name: 'topcashback-scraper',
+        testInput: { maxStores: 25 },
+        maxItemChars: 400,
+        listing: {
+            title: 'TopCashback Scraper — All Store Rates (US, UK, AU)',
+            description: 'Scrape cashback rates for every store on TopCashback in the US, UK and Australia: store, rate, % or fixed amount, currency and link. Filter by keyword or minimum rate. Pay per store.',
+            seoTitle: 'TopCashback Scraper & API | All Store Rates US UK AU',
+            seoDescription: 'Scrape current cashback rates for every TopCashback store in the US, UK and Australia: rate, % or fixed, currency and link.',
+            categories: ['ECOMMERCE', 'AI', 'DEVELOPER_TOOLS'],
+        },
+        event: { name: 'store-rate', title: 'Store rate', description: 'One TopCashback store with its current cashback rate.', priceUsd: 0.002 },
+    },
+    {
         name: 'cashback-portal-probe',
         testInput: {},
         printAllItems: true,
