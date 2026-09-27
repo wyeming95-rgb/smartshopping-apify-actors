@@ -36,7 +36,7 @@ Rates are remembered in a key-value store named `cashback-boost-monitor-state` i
 | `removed` | The store stopped offering cashback on this portal |
 | `changed` | Switched between a percentage and a fixed amount |
 
-Temporary errors (timeouts, blocks, outages) are never reported as removals; the last known rate is kept until the portal can be read again.
+Rate increases and decreases are reported on the first run that sees them. A store **appearing** (`new`) or **disappearing** (`removed`) is reported once it has been seen on **two runs in a row**, because portals occasionally serve a page without the cashback block and a single odd reading would otherwise be a false alarm. Temporary errors (timeouts, blocks, outages) are never reported as changes; the last known rate is kept until the portal can be read again.
 
 ## Input
 

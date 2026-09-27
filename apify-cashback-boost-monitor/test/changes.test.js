@@ -9,20 +9,34 @@ const row = (portal, merchant, status, rateValue, extra = {}) => ({
 });
 const prevOf = (...rows) => Object.fromEntries(rows.map((r) => [stateKey(r), snapshot({ ...r, checkedAt: 't1' })]));
 
-test('increase, decrease, removed and new against the previous run', () => {
+test('rate moves are reported at once; new and removed need two runs in a row', () => {
     const previous = prevOf(row('a', 'Nike', 'ok', 2), row('a', 'ASOS', 'ok', 5), row('a', 'Gap', 'ok', 4), row('a', 'Zara', 'not-listed', null));
-    const { changes, next } = detectChanges(previous, [
+    const day2 = detectChanges(previous, [
         row('a', 'Nike', 'ok', 10), row('a', 'ASOS', 'ok', 3), row('a', 'Gap', 'no-cashback', null), row('a', 'Zara', 'ok', 7), row('a', 'Uniqlo', 'ok', 1),
     ], { firstRun: false });
-    assert.deepEqual(changes.map((c) => [c.merchant, c.changeType, c.oldRateValue, c.newRateValue, c.changePoints]), [
+    assert.deepEqual(day2.changes.map((c) => [c.merchant, c.changeType, c.oldRateValue, c.newRateValue, c.changePoints]), [
         ['Nike', 'increase', 2, 10, 8],
         ['ASOS', 'decrease', 5, 3, -2],
-        ['Gap', 'removed', 4, null, null],
-        ['Zara', 'new', null, 7, null],
-        ['Uniqlo', 'new', null, 1, null],
+    ]); // Gap and Zara are pending; Uniqlo is a first sighting (baseline)
+    assert.equal(day2.changes[0].previousCheckAt, 't1');
+    assert.equal(day2.next['a|nike'].rateValue, 10);
+    assert.deepEqual(day2.next['a|gap'].pending, { active: false, runs: 1 });
+    assert.equal(day2.next['a|gap'].rateValue, 4); // still remembered as 4% until confirmed
+
+    const day3 = detectChanges(day2.next, [row('a', 'Gap', 'not-listed', null), row('a', 'Zara', 'ok', 7)], { firstRun: false });
+    assert.deepEqual(day3.changes.map((c) => [c.merchant, c.changeType, c.oldRateText, c.newRateText]), [
+        ['Gap', 'removed', '4%', null],
+        ['Zara', 'new', null, '7%'],
     ]);
-    assert.equal(changes[0].previousCheckAt, 't1');
-    assert.equal(next['a|nike'].rateValue, 10);
+});
+
+test('a one-run blip does not report anything', () => {
+    const previous = prevOf(row('a', 'Nike', 'ok', 2), row('a', 'ASOS', 'not-listed', null));
+    const blip = detectChanges(previous, [row('a', 'Nike', 'not-listed', null), row('a', 'ASOS', 'ok', 1)], { firstRun: false });
+    assert.equal(blip.changes.length, 0);
+    const back = detectChanges(blip.next, [row('a', 'Nike', 'ok', 2), row('a', 'ASOS', 'not-listed', null)], { firstRun: false });
+    assert.equal(back.changes.length, 0);
+    assert.equal(back.next['a|nike'].pending, null);
 });
 
 test('first run is a baseline: only portal-flagged boosts are reported', () => {

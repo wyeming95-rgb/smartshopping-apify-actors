@@ -35,12 +35,12 @@ test('day 1 saves a baseline; day 2 reports boosts, cuts and new listings, not o
     assert.equal(day2.summary.firstRun, false);
     assert.deepEqual(day2.items.map((i) => `${i.merchant}@${i.portal}:${i.changeType}:${i.oldRateText ?? '-'}->${i.newRateText ?? '-'}`), [
         'Nike@rakuten-us:increase:2%->10%',
-        'Nike@topcashback-uk:new:-->4%',
         'ASOS@rakuten-us:decrease:5%->3%',
     ]); // TopCashback UK's 503 for ASOS is not a removal; Sephora's boost was already reported
     assert.equal(day2.summary.byType.increase, 1);
 
-    // Day 3 with day 2's rates: nothing changed.
+    // Day 3 with day 2's pages: Nike's new TopCashback UK listing is now confirmed; nothing else changed.
+    assert.deepEqual(runActor(storage, input, { MOCK_DAY: '2' }).items.map((i) => `${i.merchant}@${i.portal}:${i.changeType}`), ['Nike@topcashback-uk:new']);
     assert.equal(runActor(storage, input, { MOCK_DAY: '2' }).items.length, 0);
 });
 
@@ -59,5 +59,5 @@ test('pay-per-event: changes cut off by the cost limit are reported on the next 
     const capped = runActor(storage, input, { MOCK_DAY: '2', ACTOR_TEST_PAY_PER_EVENT: 'true', ACTOR_MAX_TOTAL_CHARGE_USD: '1' });
     assert.equal(capped.items.length, 1);
     const rest = runActor(storage, input, { MOCK_DAY: '2' });
-    assert.deepEqual(rest.items.map((i) => i.changeType).sort(), ['decrease', 'new']);
+    assert.deepEqual(rest.items.map((i) => i.changeType).sort(), ['decrease', 'new']); // decrease carried over; new now confirmed
 });
