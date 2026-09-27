@@ -1,0 +1,65 @@
+{
+    "title": "Deal community scraper input",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "sources": {
+            "title": "Deal feeds",
+            "type": "array",
+            "description": "Which community deal feeds to read.",
+            "editor": "select",
+            "items": {
+                "type": "string",
+                "enum": ["slickdeals-frontpage", "hotukdeals-hot", "hotukdeals-new", "ozbargain-new"],
+                "enumTitles": ["Slickdeals frontpage (US)", "hotukdeals hottest (UK)", "hotukdeals newest (UK)", "OzBargain newest (AU)"]
+            },
+            "default": ["slickdeals-frontpage", "hotukdeals-hot", "hotukdeals-new", "ozbargain-new"],
+            "prefill": ["slickdeals-frontpage", "hotukdeals-hot", "hotukdeals-new", "ozbargain-new"]
+        },
+        "keywords": {
+            "title": "Only deals mentioning",
+            "type": "array",
+            "description": "Only return deals whose title, description, store or category contains one of these words, e.g. laptop, lego, nike. Leave empty for all deals.",
+            "editor": "stringList",
+            "default": []
+        },
+        "excludeKeywords": {
+            "title": "Skip deals mentioning",
+            "type": "array",
+            "description": "Skip deals that contain any of these words.",
+            "editor": "stringList",
+            "default": []
+        },
+        "minScore": {
+            "title": "Minimum community score",
+            "type": "integer",
+            "description": "Only deals with at least this score: Slickdeals thumbs, hotukdeals temperature (°) or OzBargain net votes. Leave empty for all.",
+            "nullable": true
+        },
+        "maxPrice": {
+            "title": "Maximum price",
+            "type": "number",
+            "description": "Only deals whose price is at most this amount, in the deal's own currency (USD, GBP or AUD). Deals without a price are skipped when this is set.",
+            "nullable": true
+        },
+        "onlyCashback": {
+            "title": "Only deals mentioning cashback",
+            "type": "boolean",
+            "description": "Only return deals that mention cash back or a cashback site (TopCashback, Rakuten, Quidco, ShopBack, Cashrewards).",
+            "default": false
+        },
+        "onlyNew": {
+            "title": "Only new deals since the last run",
+            "type": "boolean",
+            "description": "Skip deals this Actor already returned in earlier runs with the same state name. Turn on for scheduled alerts.",
+            "default": false
+        },
+        "stateName": {
+            "title": "State name",
+            "type": "string",
+            "description": "With 'Only new deals', deals already returned are remembered under this name. Use a different name for each separate schedule.",
+            "editor": "textfield",
+            "default": "default"
+        }
+    }
+}

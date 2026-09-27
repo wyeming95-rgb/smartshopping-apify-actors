@@ -1,0 +1,29 @@
+{
+    "actorSpecification": 1,
+    "fields": {},
+    "views": {
+        "overview": {
+            "title": "Deals",
+            "transformation": {
+                "fields": ["site", "country", "title", "price", "currency", "store", "score", "scoreType", "category", "mentionsCashback", "url", "postedAt"]
+            },
+            "display": {
+                "component": "table",
+                "properties": {
+                    "site": { "label": "Site" },
+                    "country": { "label": "Country" },
+                    "title": { "label": "Deal" },
+                    "price": { "label": "Price", "format": "number" },
+                    "currency": { "label": "Currency" },
+                    "store": { "label": "Store" },
+                    "score": { "label": "Score", "format": "number" },
+                    "scoreType": { "label": "Score type" },
+                    "category": { "label": "Category" },
+                    "mentionsCashback": { "label": "Cashback", "format": "boolean" },
+                    "url": { "label": "Deal page", "format": "link" },
+                    "postedAt": { "label": "Posted", "format": "date" }
+                }
+            }
+        }
+    }
+}

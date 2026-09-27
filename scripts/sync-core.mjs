@@ -5,7 +5,7 @@ import { join } from 'node:path';
 
 const root = new URL('..', import.meta.url).pathname;
 const core = join(root, 'shared/cashback-core');
-export const CORE_USERS = ['apify-cashback-rates', 'apify-cashback-boost-monitor', 'apify-rakuten-scraper', 'apify-topcashback-scraper'];
+export const CORE_USERS = ['apify-cashback-rates', 'apify-cashback-boost-monitor', 'apify-rakuten-scraper', 'apify-topcashback-scraper', 'apify-deal-community-scraper'];
 
 for (const actor of CORE_USERS) {
     if (!existsSync(join(root, actor))) continue;

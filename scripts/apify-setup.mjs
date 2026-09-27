@@ -73,6 +73,21 @@ const ACTORS = [
         event: { name: 'store-rate', title: 'Store rate', description: 'One TopCashback store with its current cashback rate.', priceUsd: 0.002 },
     },
     {
+        name: 'deal-community-scraper',
+        // A plain run, then an onlyNew run twice on the same state (the second usually returns few or no deals).
+        testInput: [{}, { onlyNew: true, stateName: 'setup-test' }, { onlyNew: true, stateName: 'setup-test' }],
+        allowEmpty: true,
+        maxItemChars: 500,
+        listing: {
+            title: 'Deal Scraper — Slickdeals, hotukdeals & OzBargain',
+            description: 'Get the latest community deals from Slickdeals (US), hotukdeals (UK) and OzBargain (AU) in one format: title, price, store, votes, category, link. Filter by keyword, score or price; only-new mode for alerts.',
+            seoTitle: 'Slickdeals, hotukdeals & OzBargain Deal Scraper',
+            seoDescription: 'Scrape the latest Slickdeals, hotukdeals and OzBargain deals: price, store, votes, category and link. Keyword alerts, only-new mode.',
+            categories: ['ECOMMERCE', 'AUTOMATION', 'DEVELOPER_TOOLS'],
+        },
+        event: { name: 'deal', title: 'Deal', description: 'One community deal saved to the dataset.', priceUsd: 0.001 },
+    },
+    {
         name: 'cashback-portal-probe',
         testInput: {},
         printAllItems: true,

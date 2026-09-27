@@ -1,0 +1,14 @@
+{
+  "actorSpecification": 1,
+  "name": "deal-community-scraper",
+  "title": "Deal Scraper — Slickdeals, hotukdeals & OzBargain",
+  "description": "Get the latest community deals from Slickdeals (US), hotukdeals (UK) and OzBargain (AU) in one format: title, price, store, votes, category, link. Filter by keyword, score or price; only-new mode for alerts.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "output": "./output_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "dockerfile": "./Dockerfile"
+}

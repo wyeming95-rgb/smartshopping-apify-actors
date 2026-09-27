@@ -1,0 +1,16 @@
+{
+    "actorOutputSchemaVersion": 1,
+    "title": "Community deals",
+    "properties": {
+        "results": {
+            "type": "string",
+            "title": "Deals",
+            "template": "{{links.apiDefaultDatasetUrl}}/items?view=overview"
+        },
+        "summary": {
+            "type": "string",
+            "title": "Run summary: deals per feed and how many were saved",
+            "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/SUMMARY"
+        }
+    }
+}
