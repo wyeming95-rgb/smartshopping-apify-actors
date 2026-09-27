@@ -34,8 +34,8 @@ test('scrapes every store in all three countries', () => {
         'US:Nike:6%:USD', // the store's own rate, not the 15% banner for another store
         'US:Walmart:Up to 4%:USD',
     ]);
-    assert.deepEqual(summary.countries.US, { storesInSitemap: 4, storesMatching: 4, checking: 4 });
-    assert.deepEqual([summary.checked, summary.withCashback, summary.notListed, summary.errors], [8, 5, 2, 1]);
+    assert.deepEqual(summary.countries.US, { storesInSitemap: 5, storesMatching: 5, checking: 5 });
+    assert.deepEqual([summary.checked, summary.withCashback, summary.notListed, summary.errors], [9, 5, 3, 1]);
 });
 
 test('countries, keywords, minimum rate and per-country limit', () => {

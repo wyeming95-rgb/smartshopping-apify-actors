@@ -19,7 +19,7 @@
         "maxStores": {
             "title": "Maximum stores per country",
             "type": "integer",
-            "description": "How many stores to check in each country, in directory order. Set 0 to check every store (thousands per country; a full US run takes about 45 minutes).",
+            "description": "How many stores to check in each country, in directory order. Set 0 to check every store (thousands per country; a full US run checks about 9,800 pages and takes about 75 minutes).",
             "default": 100,
             "minimum": 0,
             "prefill": 100

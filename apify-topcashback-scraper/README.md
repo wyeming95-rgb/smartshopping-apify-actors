@@ -32,7 +32,7 @@ TopCashback lists thousands of stores in each country, and rates change daily. T
 | Field | What it does | Default |
 |---|---|---|
 | `countries` | Which TopCashback sites to scrape: `US`, `UK`, `AU` | all three |
-| `maxStores` | How many stores to check **per country**, in directory order. `0` checks every store (a full US run takes about 45 minutes) | `100` |
+| `maxStores` | How many stores to check **per country**, in directory order. `0` checks every store (a full US run checks about 9,800 pages and takes about 75 minutes) | `100` |
 | `storeKeywords` | Only stores whose name contains one of these words | all stores |
 | `minRatePercent` | Only stores paying at least this percentage (fixed-amount offers are always kept) | `0` |
 | `includeNoCashback` | Also return store pages where no rate could be read | `false` |

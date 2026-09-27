@@ -61,6 +61,7 @@ const ACTORS = [
     {
         name: 'topcashback-scraper',
         testInput: { maxStores: 25 },
+        timeoutSecs: 7200, // a full US run checks ~9,800 pages
         maxItemChars: 400,
         listing: {
             title: 'TopCashback Scraper — All Store Rates (US, UK, AU)',
@@ -155,7 +156,7 @@ async function configure() {
         const updates = {
             'title, description, categories, SEO, run defaults': {
                 ...a.listing,
-                defaultRunOptions: { build: 'latest', memoryMbytes: 512, timeoutSecs: 3600 },
+                defaultRunOptions: { build: 'latest', memoryMbytes: 512, timeoutSecs: a.timeoutSecs ?? 3600 },
             },
         };
         // Re-submitting pricing on a public Actor can register as a price change, so only send it when it differs.

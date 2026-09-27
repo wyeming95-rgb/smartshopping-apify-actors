@@ -1,5 +1,6 @@
-// TopCashback's store list comes from each country site's public sitemap. Every store page there has a
-// matching /<store>/reviews/ page, which tells store pages apart from help, blog and category pages.
+// TopCashback's store list comes from each country site's public sitemap: store pages are its top-level
+// pages (/nike/), minus known site pages. Anything else that slips through is dropped after fetching, because
+// store pages have a recognisable title (see looksLikeStorePage), and costs the user nothing.
 import { sitemapStores } from './core/directory-run.js';
 
 export { filterStores } from './core/directory-run.js';
@@ -10,10 +11,12 @@ export const SITES = {
     AU: { portalId: 'topcashback-au', base: 'https://www.topcashback.com.au', currency: 'AUD' },
 };
 
-// Top-level pages that are not stores, for sitemaps without review pages.
+// Top-level site pages that are not stores.
 const NOT_STORES = new Set(['help', 'blog', 'terms', 'privacy', 'about', 'join', 'login', 'logon', 'error', 'offers', 'trending',
     'category', 'categories', 'cookie-policy', 'acceptable-use-policy', 'press-center', 'do-not-share', 'rakuten-comparison',
-    'refer-a-friend', 'contact', 'contact-us', 'faq', 'search', 'sitemap', 'account', 'my-account', 'earnings', 'accessibility']);
+    'refer-a-friend', 'refer-and-earn', 'contact', 'contact-us', 'faq', 'search', 'sitemap', 'account', 'my-account', 'earnings',
+    'accessibility', 'top-gift-cards', 'browser-extension', 'labs', 'sell-your-phone', 'app', 'guides', 'guides-intro', 'compare',
+    'dyn', 'security', 'careers', 'jobs', 'reviews', 'giftcards', 'gift-cards', 'mobile-app', 'tcb-plus', 'plus', 'vouchers']);
 
 const pathOf = (url, base) => {
     try {
@@ -24,20 +27,13 @@ const pathOf = (url, base) => {
     }
 };
 
-/** Store pages in a TopCashback sitemap, in sitemap order. */
+/** Candidate store pages in a TopCashback sitemap, in sitemap order. */
 export function storeUrls(xml, base) {
-    const reviewed = new Set();
-    for (const [, loc] of xml.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/g)) {
-        const slug = pathOf(loc, base)?.match(/^\/([a-z0-9][a-z0-9-]*)\/reviews\/?$/i)?.[1];
-        if (slug) reviewed.add(slug.toLowerCase());
-    }
     return sitemapStores(xml, (url) => {
         const slug = pathOf(url, base)?.match(/^\/([a-z0-9][a-z0-9-]*)\/?$/i)?.[1]?.toLowerCase();
-        if (!slug) return null;
-        if (reviewed.size) return reviewed.has(slug) ? slug : null;
-        return NOT_STORES.has(slug) ? null : slug;
+        return slug && !NOT_STORES.has(slug) ? slug : null;
     }).map((s) => ({ ...s, url: `${base}/${s.slug}/` }));
 }
 
-/** Store pages are titled "<Store> Offers, Cash Back, ..." (US) or "<Store> Offers ..." / "<Store> Cashback ..." (UK, AU). */
-export const looksLikeStorePage = (html) => /<title[^>]*>[^<]*\b(?:Offers|Cash ?back)\b/i.test(html) || html.includes('merch-primary-slice');
+/** Store pages are titled "<Store> Offers, Cash Back, ..." (US) or "<Store> Offers" / "<Store> Cashback Offers" (UK, AU). */
+export const looksLikeStorePage = (html) => /<title[^>]*>(?!\s*TopCashback)[^<]*\bOffers\b/i.test(html) || html.includes('merch-primary-slice');
