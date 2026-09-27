@@ -1,0 +1,46 @@
+# Posts hot deals and cashback boosts to the SmartShopping Telegram channel (scripts/telegram-channel.mjs).
+# Scheduled runs do nothing until the TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID secrets are added.
+# Run it manually without those secrets for a dry run that prints the messages instead of posting.
+name: telegram channel
+
+on:
+  schedule:
+    - cron: "7 * * * *" # deals, hourly
+    - cron: "23 */6 * * *" # cashback boosts, every 6 hours
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "deals | boosts"
+        required: true
+        default: deals
+        type: choice
+        options: [deals, boosts]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: telegram-channel-${{ github.event.schedule || inputs.mode }}
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      MODE: ${{ inputs.mode || (github.event.schedule == '23 */6 * * *' && 'boosts' || 'deals') }}
+    steps:
+      - name: Skip scheduled runs until the channel is set up
+        if: github.event_name == 'schedule' && (env.TELEGRAM_BOT_TOKEN == '' || env.TELEGRAM_CHAT_ID == '')
+        run: echo "::notice::Telegram secrets not set; skipping scheduled post."
+      - uses: actions/checkout@v4
+        if: github.event_name != 'schedule' || (env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != '')
+      - uses: actions/setup-node@v4
+        if: github.event_name != 'schedule' || (env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != '')
+        with:
+          node-version: 22
+      - run: node scripts/telegram-channel.mjs "$MODE"
+        if: github.event_name != 'schedule' || (env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != '')
