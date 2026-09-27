@@ -15,7 +15,7 @@ const statePrefix = dryRun ? 'telegram-dryrun' : 'telegram';
 // Community score a deal needs before we post it, per site (the scales differ: thumbs, temperature °, votes).
 const DEAL_FEEDS = [
     { source: 'slickdeals-frontpage', minScore: 25 },
-    { source: 'hotukdeals-hot', minScore: 300 },
+    { source: 'hotukdeals-hot', minScore: 100 },
     { source: 'ozbargain-new', minScore: 25 },
 ];
 const MAX_DEALS_PER_RUN = 8;
