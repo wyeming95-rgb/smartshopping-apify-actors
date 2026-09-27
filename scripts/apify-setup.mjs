@@ -6,13 +6,14 @@
 const API = 'https://api.apify.com/v2';
 const token = process.env.APIFY_TOKEN;
 if (!token) throw new Error('APIFY_TOKEN is not set');
-const EXPECTED_ACCOUNT = 'smartshopping-data';
+const EXPECTED_ACCOUNT = 'smartshopping';
 
 const ACTORS = [
     {
         name: 'cashback-portal-probe',
-        testInput: { merchant: 'nike' },
+        testInput: {},
         printAllItems: true,
+        maxItemChars: 6000,
     },
 ].filter((a) => !process.env.ONLY || process.env.ONLY.split(',').map((n) => n.trim()).includes(a.name));
 if (!ACTORS.length) throw new Error(`ONLY=${process.env.ONLY} matches no Actor`);
@@ -68,7 +69,7 @@ async function test() {
         console.log(`status=${r.status} duration=${secs}s usageUsd=${r.usageTotalUsd?.toFixed?.(4)}`);
         const items = await api(`/datasets/${r.defaultDatasetId}/items?clean=1&limit=1000`);
         console.log(`items=${items.length}`);
-        for (const it of a.printAllItems ? items : items.slice(0, 4)) console.log('  ', JSON.stringify(it).slice(0, 1500));
+        for (const it of a.printAllItems ? items : items.slice(0, 4)) console.log('  ', JSON.stringify(it).slice(0, a.maxItemChars ?? 1500));
         const log = await api(`/logs/${r.id}`);
         const interesting = String(log).split('\n').filter((l) => /WARN|ERROR|Error|failed|Done:/.test(l));
         console.log('--- log highlights ---\n' + interesting.slice(-40).join('\n'));

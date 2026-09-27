@@ -3,25 +3,17 @@
     "type": "object",
     "schemaVersion": 1,
     "properties": {
-        "merchant": {
-            "title": "Merchant slug",
-            "type": "string",
-            "description": "Merchant used to build each portal's store URL, e.g. nike.",
-            "editor": "textfield",
-            "default": "nike"
-        },
-        "portals": {
-            "title": "Portals",
+        "targets": {
+            "title": "Targets",
             "type": "array",
-            "description": "Portal IDs to probe. Empty probes all of them.",
-            "editor": "stringList",
-            "default": []
+            "description": "List of {portal, url, linkPattern?} to fetch. Leave empty for the built-in set.",
+            "editor": "json"
         },
         "useProxy": {
-            "title": "Also try Apify Proxy",
+            "title": "Use Apify Proxy",
             "type": "boolean",
-            "description": "Fetch each page a second time through Apify Proxy when the plan allows it.",
-            "default": true
+            "description": "Fetch through Apify Proxy instead of directly.",
+            "default": false
         }
     }
 }
