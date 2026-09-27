@@ -1,6 +1,9 @@
 // Apify account setup for the SmartShopping Data Actors, run from GitHub Actions.
 //   node scripts/apify-setup.mjs whoami  -> which Apify account the token belongs to, and its Actors
 //   node scripts/apify-setup.mjs test    -> run each Actor once on real data and print its results
+//   node scripts/apify-setup.mjs configure -> title/description, Store SEO, run defaults, pay-per-event pricing
+//   node scripts/apify-setup.mjs publish -> make the Actors public on Apify Store
+// Actors without a `listing` (such as the internal probe) are never configured or published.
 // Set ONLY=<name>[,<name>...] to limit a stage to some Actors.
 // Needs APIFY_TOKEN in the environment. Never prints the token.
 const API = 'https://api.apify.com/v2';
@@ -14,6 +17,14 @@ const ACTORS = [
         testInput: { merchants: ['Nike', 'ASOS', 'Amazon', 'Walmart', 'Best Buy', 'THE ICONIC', 'Marks & Spencer', 'Sephora'], includeNotListed: true },
         printAllItems: true,
         maxItemChars: 600,
+        listing: {
+            title: 'Cashback Rate Comparison — Rakuten, TopCashback & more',
+            description: 'Compare cashback rates for any store across Rakuten, TopCashback, BeFrugal, Capital One Shopping, Mr. Rebates and ShopBack in the US, UK and Australia. Best rate per store per country. Pay per rate found.',
+            seoTitle: 'Cashback Rate Scraper & API | Rakuten, TopCashback',
+            seoDescription: 'Compare cashback rates for any store on Rakuten, TopCashback, BeFrugal, ShopBack and more, across the US, UK and Australia.',
+            categories: ['ECOMMERCE', 'AI', 'DEVELOPER_TOOLS'],
+        },
+        event: { name: 'cashback-rate', title: 'Cashback rate', description: 'One cashback rate found for a store on a portal.', priceUsd: 0.003 },
     },
     {
         name: 'cashback-portal-probe',
@@ -85,7 +96,63 @@ async function test() {
     if (failures) process.exitCode = 1;
 }
 
+async function configure() {
+    for (const a of ACTORS.filter((x) => x.listing)) {
+        if (a.listing.seoTitle.length > 60) throw new Error(`${a.name}: seoTitle is ${a.listing.seoTitle.length} chars; Apify allows 60`);
+        console.log(`\n=== ${a.name} ===`);
+        const id = await actorId(a.name);
+        const live = await api(`/acts/${id}`);
+        const updates = {
+            'title, description, categories, SEO, run defaults': {
+                ...a.listing,
+                defaultRunOptions: { build: 'latest', memoryMbytes: 512, timeoutSecs: 3600 },
+            },
+        };
+        // Re-submitting pricing on a public Actor can register as a price change, so only send it when it differs.
+        const livePrice = (live.pricingInfos ?? []).at(-1)?.pricingPerEvent?.actorChargeEvents?.[a.event.name]?.eventPriceUsd;
+        if (livePrice === a.event.priceUsd) {
+            console.log(`= pricing already ${a.event.name} $${livePrice}, unchanged`);
+        } else {
+            updates['pay-per-event pricing'] = {
+                pricingInfos: [{
+                    pricingModel: 'PAY_PER_EVENT',
+                    pricingPerEvent: { actorChargeEvents: { [a.event.name]: { eventTitle: a.event.title, eventDescription: a.event.description, eventPriceUsd: a.event.priceUsd } } },
+                }],
+            };
+        }
+        for (const [label, body] of Object.entries(updates)) {
+            try {
+                await api(`/acts/${id}`, { method: 'PUT', body });
+                console.log(`✅ ${label}`);
+            } catch (e) {
+                console.log(`❌ ${label}: ${e.message}`);
+                process.exitCode = 1;
+            }
+        }
+        const act = await api(`/acts/${id}`);
+        console.log(JSON.stringify({
+            title: act.title,
+            categories: act.categories,
+            seoTitle: act.seoTitle,
+            hasPicture: Boolean(act.pictureUrl),
+            pricing: (act.pricingInfos ?? []).map((p) => ({ model: p.pricingModel, events: p.pricingPerEvent?.actorChargeEvents })),
+        }, null, 2));
+    }
+}
+
+async function publish() {
+    for (const a of ACTORS.filter((x) => x.listing)) {
+        try {
+            await api(`/acts/${await actorId(a.name)}`, { method: 'PUT', body: { isPublic: true } });
+            console.log(`✅ ${a.name} public: https://apify.com/${EXPECTED_ACCOUNT}/${a.name}`);
+        } catch (e) {
+            console.log(`❌ ${a.name}: ${e.message}`);
+            process.exitCode = 1;
+        }
+    }
+}
+
 const stage = process.argv[2];
-const stages = { whoami, test };
+const stages = { whoami, test, configure, publish };
 if (!stages[stage]) throw new Error(`Usage: apify-setup.mjs <${Object.keys(stages).join('|')}>`);
 await stages[stage]();

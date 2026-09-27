@@ -10,11 +10,11 @@ on:
   workflow_dispatch:
     inputs:
       stage:
-        description: "whoami | test"
+        description: "whoami | test | configure | publish"
         required: true
         default: whoami
         type: choice
-        options: [whoami, test]
+        options: [whoami, test, configure, publish]
       actors:
         description: "Comma-separated Actor names to limit to (empty = all)"
         required: false
