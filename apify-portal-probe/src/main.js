@@ -8,12 +8,14 @@ await Actor.init();
 
 // count: regexes whose total and unique first-group matches are reported (e.g. how many stores a directory page holds).
 const LOC = ['<loc>([^<]+)</loc>'];
+const TOP_LEVEL = (host) => [`<loc>https://${host.replace(/\./g, '\\.')}/([a-z0-9-]+)/?</loc>`, `<loc>https://${host.replace(/\./g, '\\.')}/([a-z0-9-]+)/reviews/?</loc>`, `<loc>https://${host.replace(/\./g, '\\.')}/([a-z0-9-]+)/[a-z0-9-]+/?</loc>`];
 const DEFAULT_TARGETS = [
-    { portal: 'rakuten-sitemap-index', url: 'https://www.rakuten.com/sitemap-index.xml', count: LOC, head: 400 },
-    { portal: 'rakuten-all-pageinfo', url: 'https://www.rakuten.com/stores/all', count: ['"pageInfo":(\\{[^}]{0,300}\\})', '"(?:endCursor|after|cursor|hasNextPage|totalCount)":("?[^,"}]{0,80}"?)', '"(?:feedName|topicName|title_text|heading_text)":"([^"]{2,80})"'] },
-    { portal: 'rakuten-store-nike', url: 'https://www.rakuten.com/shop/nike' },
-    { portal: 'topcashback-us-store', url: 'https://www.topcashback.com/nike/' },
-    { portal: 'topcashback-us-category', url: 'https://www.topcashback.com/category/fashion/', count: ['class="([a-z0-9_-]*(?:merch|tile|card|retailer)[a-z0-9_-]*)"', 'href="/([a-z0-9-]+)/"'], around: 'category-merchant' },
+    // How many top-level pages are there, and how many have a /reviews/ page?
+    { portal: 'topcashback-us-sitemap', url: 'https://www.topcashback.com/sitemap.xml', count: TOP_LEVEL('www.topcashback.com') },
+    { portal: 'topcashback-uk-sitemap', url: 'https://www.topcashback.co.uk/sitemap.xml', count: TOP_LEVEL('www.topcashback.co.uk') },
+    { portal: 'topcashback-au-sitemap', url: 'https://www.topcashback.com.au/sitemap.xml', count: TOP_LEVEL('www.topcashback.com.au') },
+    // Is a well-known US store without a reviews page a normal store page?
+    { portal: 'topcashback-us-target', url: 'https://www.topcashback.com/target/' },
 ]
 
 const BOT_WALLS = [
