@@ -6,7 +6,7 @@
         "maxStores": {
             "title": "Maximum stores to check",
             "type": "integer",
-            "description": "How many stores from Rakuten's directory to check, in directory order. Set 0 to check every store (about 3,500; takes roughly 25 minutes).",
+            "description": "How many stores from Rakuten's directory to check, in directory order. Set 0 to check every store (about 4,200; takes roughly 35 minutes).",
             "default": 100,
             "minimum": 0,
             "prefill": 100

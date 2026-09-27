@@ -53,7 +53,7 @@ const ACTORS = [
             title: 'Rakuten Cashback Scraper — All Store Rates',
             description: 'Scrape cash back rates for every store on Rakuten (US): store name, rate, % or fixed amount, store ID and link. Filter by keyword or minimum rate. Pay per store.',
             seoTitle: 'Rakuten Cash Back Rates Scraper & API | All Stores',
-            seoDescription: 'Scrape current cash back rates for all ~3,500 Rakuten (US) stores: rate, % or fixed, store ID and link. Export JSON, CSV or Excel.',
+            seoDescription: 'Scrape current cash back rates for all 4,000+ Rakuten (US) stores: rate, % or fixed, store ID and link. Export JSON, CSV or Excel.',
             categories: ['ECOMMERCE', 'AI', 'DEVELOPER_TOOLS'],
         },
         event: { name: 'store-rate', title: 'Store rate', description: 'One Rakuten store with its current cash back rate.', priceUsd: 0.002 },

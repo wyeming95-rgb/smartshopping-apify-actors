@@ -2,7 +2,7 @@
 
 **Get the current cash back rate for every store on Rakuten (US) as a clean dataset: store name, rate, percentage or fixed amount, Rakuten store ID and link.**
 
-Rakuten lists about 3,500 stores, and rates change daily. This Actor reads Rakuten's public store directory and returns one row per store, so you don't have to click through store pages or keep a spreadsheet up to date.
+Rakuten lists over 4,000 stores, and rates change daily. This Actor reads Rakuten's public store directory and returns one row per store, so you don't have to click through store pages or keep a spreadsheet up to date.
 
 ## What you can do with it
 
@@ -24,7 +24,7 @@ Rakuten lists about 3,500 stores, and rates change daily. This Actor reads Rakut
 
 | Field | What it does | Default |
 |---|---|---|
-| `maxStores` | How many stores to check, in directory order. `0` checks every store (about 3,500, roughly 25 minutes) | `100` |
+| `maxStores` | How many stores to check, in directory order. `0` checks every store (about 4,200, roughly 35 minutes) | `100` |
 | `storeKeywords` | Only stores whose name contains one of these words | all stores |
 | `minRatePercent` | Only stores paying at least this percentage (fixed-amount offers are always kept) | `0` |
 | `includeNoCashback` | Also return stores listed on Rakuten that pay no cash back right now | `false` |

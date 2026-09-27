@@ -6,7 +6,7 @@ const store = (slug, og, id) => ({
 
 const PAGES = {
     'https://www.rakuten.com/merchant_sitemap.xml': {
-        html: `<?xml version="1.0"?><urlset>${['shop/nike', 'shop/sephora', 'shop/gone', 'shop/bestbuy', 'shop/nike/', 'shop/hotels', 'shop/amazon', 'blog/post', 'shop/broken']
+        html: `<?xml version="1.0"?><urlset>${['shop/nike', 'shop/sephora', 'shop/gone', 'shop/bestbuy', 'shop/nike/', 'shop/hotels', 'shop/amazon', 'blog/post', 'shop/broken', 'shop/100percentpure']
             .map((p) => `<url><loc>https://www.rakuten.com/${p}</loc></url>`).join('')}</urlset>`,
     },
     'https://www.rakuten.com/shop/nike': store('nike', 'Nike 10% Cash Back + Coupons', 9528),
@@ -17,6 +17,7 @@ const PAGES = {
     'https://www.rakuten.com/shop/hotels': store('hotels', 'Hotels.com $25 Cash Back + Coupons', 1234),
     'https://www.rakuten.com/shop/amazon': store('amazon', 'Amazon No Cash Back + Coupons', 11),
     'https://www.rakuten.com/shop/broken': { status: 503, html: '' },
+    'https://www.rakuten.com/shop/100percentpure': store('100percentpure', '100% Pure 2.5% Cash Back + Coupons', 11746),
 };
 
 globalThis.__cashbackFetchPage = async (url) => {

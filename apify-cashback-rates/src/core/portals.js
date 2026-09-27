@@ -10,8 +10,17 @@ const pathOf = (u) => {
 const visibleText = (html) => clean(html.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' '));
 const notListed = { listed: false };
 
-/** Merchant name from the text before the rate, e.g. "Nike 8% Cash Back + Coupons" -> "Nike". */
-const nameBeforeRate = (s) => clean(s).split(/\s*(?:\||-|:)?\s*(?:up to\s*|<\s*)?(?:\d+(?:\.\d+)?\s?%|[$£]\s?\d)/i)[0].trim() || null;
+/**
+ * Merchant name from the text before the rate, e.g. "Nike 8% Cash Back + Coupons" -> "Nike". Cuts at the rate followed
+ * by "cash back", so names that start with a number survive ("100% Pure 2.5% Cash Back" -> "100% Pure").
+ */
+const RATE_WITH_LABEL = /\s*(?:\||-|:)?\s*(?:up to\s*|<\s*)?(?:\d+(?:\.\d+)?\s?%|[$£]\s?\d+(?:\.\d+)?)\s*(?:cash\s?back|cashback)/i;
+const nameBeforeRate = (s) => {
+    const text = clean(s);
+    const at = text.search(RATE_WITH_LABEL);
+    const name = at > 0 ? text.slice(0, at) : text.split(/\s*(?:\||-|:)?\s*(?:up to\s*|<\s*)?(?:\d+(?:\.\d+)?\s?%|[$£]\s?\d)/i)[0];
+    return name.trim() || null;
+};
 
 const rakuten = {
     id: 'rakuten-us', name: 'Rakuten', country: 'US', currency: 'USD',
