@@ -1,0 +1,52 @@
+# Tests every Apify Actor in this repo and, when the APIFY_TOKEN repository
+# secret is set, pushes each one to Apify (creating it on first push).
+name: deploy apify actors
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apify-*/**"
+      - ".github/workflows/deploy-apify.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # Each build takes 4 GB and the Apify free plan allows 16 GB in total, so build at most 3 at once.
+      max-parallel: 3
+      matrix:
+        # Actor IDs are pinned so pushes update the existing Actors instead of
+        # resolving them by <username>/<name>, which breaks after a username change.
+        include:
+          - actor: apify-portal-probe
+            actor_id: ""
+    defaults:
+      run:
+        working-directory: ${{ matrix.actor }}
+    env:
+      APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test
+      - name: Push to Apify
+        if: env.APIFY_TOKEN != ''
+        run: |
+          npx --yes apify-cli@latest login --token "$APIFY_TOKEN"
+          if [ -n "${{ matrix.actor_id }}" ]; then
+            npx --yes apify-cli@latest push "${{ matrix.actor_id }}"
+          else
+            npx --yes apify-cli@latest push
+          fi
+      - name: Skip deploy (no token)
+        if: env.APIFY_TOKEN == ''
+        run: echo "::notice::APIFY_TOKEN secret not set; tested ${{ matrix.actor }} but did not deploy."

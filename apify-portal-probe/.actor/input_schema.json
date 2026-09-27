@@ -1,0 +1,27 @@
+{
+    "title": "Cashback portal probe input",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "merchant": {
+            "title": "Merchant slug",
+            "type": "string",
+            "description": "Merchant used to build each portal's store URL, e.g. nike.",
+            "editor": "textfield",
+            "default": "nike"
+        },
+        "portals": {
+            "title": "Portals",
+            "type": "array",
+            "description": "Portal IDs to probe. Empty probes all of them.",
+            "editor": "stringList",
+            "default": []
+        },
+        "useProxy": {
+            "title": "Also try Apify Proxy",
+            "type": "boolean",
+            "description": "Fetch each page a second time through Apify Proxy when the plan allows it.",
+            "default": true
+        }
+    }
+}

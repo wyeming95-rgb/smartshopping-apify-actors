@@ -1,0 +1,10 @@
+{
+  "actorSpecification": 1,
+  "name": "cashback-portal-probe",
+  "title": "Cashback portal probe (internal)",
+  "description": "Development-only: checks whether each cashback portal's public merchant pages can be fetched from Apify and where the rates live. Not for the Store.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "dockerfile": "./Dockerfile"
+}

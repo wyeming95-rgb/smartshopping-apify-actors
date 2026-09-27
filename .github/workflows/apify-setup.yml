@@ -1,0 +1,38 @@
+# Runs scripts/apify-setup.mjs against the Apify account.
+# A push that changes the script or this file runs the read-only "whoami" stage;
+# the other stages only run when dispatched explicitly.
+name: apify setup
+
+on:
+  push:
+    branches: [main]
+    paths: ["scripts/apify-setup.mjs", ".github/workflows/apify-setup.yml"]
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: "whoami | test"
+        required: true
+        default: whoami
+        type: choice
+        options: [whoami, test]
+      actors:
+        description: "Comma-separated Actor names to limit to (empty = all)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
+      ONLY: ${{ inputs.actors }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/apify-setup.mjs "${{ inputs.stage || 'whoami' }}"
