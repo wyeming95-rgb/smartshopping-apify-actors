@@ -7,10 +7,12 @@ import { gotScraping } from 'got-scraping';
 await Actor.init();
 
 const DEFAULT_TARGETS = [
-    { portal: 'topcashback-us-nike', url: 'https://www.topcashback.com/nike/', around: 'merch-highlight__content' },
-    { portal: 'topcashback-us-walmart', url: 'https://www.topcashback.com/walmart/', around: 'merch-highlight__content' },
-    { portal: 'topcashback-us-sephora', url: 'https://www.topcashback.com/sephora/', around: 'merch-highlight__content' },
-];
+    { portal: 'rakuten-all', url: 'https://www.rakuten.com/stores/all', around: 'Sephora', linkPattern: '^/shop/[a-z0-9-]+$|rakuten\\.com/shop/' },
+    { portal: 'rakuten-all-page2', url: 'https://www.rakuten.com/stores/all?page=2', linkPattern: '^/shop/' },
+    { portal: 'topcashback-us-az', url: 'https://www.topcashback.com/a-z/', linkPattern: '^/[a-z0-9-]+/$|/a-z/' },
+    { portal: 'topcashback-uk-az', url: 'https://www.topcashback.co.uk/a-z/', linkPattern: '/a-z/' },
+    { portal: 'shopback-au-all', url: 'https://www.shopback.com.au/all-stores', around: 'THE ICONIC', linkPattern: 'all-stores|^/[a-z0-9-]+$' },
+]
 
 const BOT_WALLS = [
     ['cloudflare-challenge', /cf-chl|challenge-platform|Just a moment\.\.\.|cf_chl_opt/i],
@@ -54,6 +56,9 @@ function analyze(html, target) {
         try {
             const data = JSON.parse(next);
             report.nextDataTopKeys = Object.keys(data.props?.pageProps ?? {}).slice(0, 25);
+            report.nextDataBytes = next.length;
+            const d = data.props?.pageProps?.d;
+            if (d && typeof d === 'object') report.nextDataD = Object.fromEntries(Object.entries(d).slice(0, 15).map(([k, v]) => [k, Array.isArray(v) ? `array(${v.length}) ${JSON.stringify(v[0]).slice(0, 300)}` : typeof v === 'object' && v ? `keys: ${Object.keys(v).slice(0, 12).join(',')}` : String(v).slice(0, 80)]));
             report.nextDataHits = jsonHits(data.props?.pageProps ?? data);
         } catch (err) {
             report.nextDataError = err.message;
