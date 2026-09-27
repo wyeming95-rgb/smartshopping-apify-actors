@@ -9,15 +9,11 @@ await Actor.init();
 // count: regexes whose total and unique first-group matches are reported (e.g. how many stores a directory page holds).
 const LOC = ['<loc>([^<]+)</loc>'];
 const DEFAULT_TARGETS = [
-    // Where does the full store list live? Count every shape of store reference in the 1.7 MB page.
-    { portal: 'rakuten-all', url: 'https://www.rakuten.com/stores/all', count: ['rakuten\\.com/([a-z0-9-]+)_\\d+-xfas', '"/shop/([a-z0-9-]+)"', '"(?:name|storeName|merchantName|displayName)":"([^"]{2,60})"', '"__typename":"([A-Za-z]+)"', '"reward_text":"([^"]+)"', '"slug(?:Name)?":"([^"]+)"'] },
-    { portal: 'rakuten-robots', url: 'https://www.rakuten.com/robots.txt', count: ['Sitemap: (\\S+)'] },
-    { portal: 'rakuten-sitemap', url: 'https://www.rakuten.com/sitemap.xml', count: LOC, head: 800 },
-    { portal: 'topcashback-us-sitemap', url: 'https://www.topcashback.com/sitemap.xml', count: LOC, head: 800 },
-    { portal: 'topcashback-uk-sitemap', url: 'https://www.topcashback.co.uk/sitemap.xml', count: LOC, head: 800 },
-    { portal: 'topcashback-au-sitemap', url: 'https://www.topcashback.com.au/sitemap.xml', count: LOC, head: 800 },
-    { portal: 'topcashback-us-category', url: 'https://www.topcashback.com/category/fashion/', count: ['href="/([a-z0-9-]+)/"', '(?:Up to )?[$\\d.]+%? Cash Back'], around: 'Cash Back', linkPattern: 'page|sort|all' },
-    { portal: 'shopback-au-sitemap', url: 'https://www.shopback.com.au/sitemap.xml', count: LOC, head: 800 },
+    { portal: 'rakuten-sitemap-index', url: 'https://www.rakuten.com/sitemap-index.xml', count: LOC, head: 400 },
+    { portal: 'rakuten-all-pageinfo', url: 'https://www.rakuten.com/stores/all', count: ['"pageInfo":(\\{[^}]{0,300}\\})', '"(?:endCursor|after|cursor|hasNextPage|totalCount)":("?[^,"}]{0,80}"?)', '"(?:feedName|topicName|title_text|heading_text)":"([^"]{2,80})"'] },
+    { portal: 'rakuten-store-nike', url: 'https://www.rakuten.com/shop/nike' },
+    { portal: 'topcashback-us-store', url: 'https://www.topcashback.com/nike/' },
+    { portal: 'topcashback-us-category', url: 'https://www.topcashback.com/category/fashion/', count: ['class="([a-z0-9_-]*(?:merch|tile|card|retailer)[a-z0-9_-]*)"', 'href="/([a-z0-9-]+)/"'], around: 'category-merchant' },
 ]
 
 const BOT_WALLS = [
