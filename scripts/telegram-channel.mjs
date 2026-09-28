@@ -43,7 +43,10 @@ const MIN_BOOST_POINTS = 2;
 const FLAGS = { US: '🇺🇸', UK: '🇬🇧', AU: '🇦🇺' };
 const SYMBOL = { USD: '$', GBP: '£', AUD: 'A$' };
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const FOOTER = '<i>Data: <a href="https://apify.com/Smart-Shopping-Data">SmartShopping Data</a></i>';
+// Each post ends with a call to action for the Apify Actor behind it: the channels are the shop window for the Actors.
+const STORE = 'https://apify.com/Smart-Shopping-Data';
+const DEALS_FOOTER = `🔔 <i>Alerts for your own keywords:</i> <a href="${STORE}/deal-community-scraper">Deal Scraper</a>`;
+const CASHBACK_FOOTER = `🔔 <i>Track your own stores:</i> <a href="${STORE}/cashback-boost-monitor">Cashback Boost Monitor</a>`;
 
 // Actor IDs never change, unlike the account's username.
 const ACTOR_IDS = { 'deal-community-scraper': '7e7KW09J9d6LPGucb', 'cashback-boost-monitor': 'G8TC7sUTmxwNak3Nz' };
@@ -108,7 +111,7 @@ export function dealMessage(d) {
         [price && `💰 ${esc(price)}`, d.store && `🏬 ${esc(d.store)}`, `📈 ${esc(score)} on ${esc(d.site)}`].filter(Boolean).join('  ·  '),
         d.mentionsCashback ? '💸 Stacks with cashback' : null,
         `<a href="${esc(d.url)}">View deal</a>`,
-        FOOTER,
+        DEALS_FOOTER,
     ].filter(Boolean).join('\n');
 }
 
@@ -126,11 +129,11 @@ export function boostDigest(changes, date = new Date()) {
     const messages = [];
     let lines = [];
     const flush = () => {
-        if (lines.length) messages.push([messages.length ? `${header} (cont.)` : header, '', ...lines, '', FOOTER].join('\n'));
+        if (lines.length) messages.push([messages.length ? `${header} (cont.)` : header, '', ...lines, '', CASHBACK_FOOTER].join('\n'));
         lines = [];
     };
     for (const line of sorted.map(boostLine)) {
-        if ([header, ...lines, line, FOOTER].join('\n').length > 3800) flush();
+        if ([header, ...lines, line, CASHBACK_FOOTER].join('\n').length > 3800) flush();
         lines.push(line);
     }
     flush();
