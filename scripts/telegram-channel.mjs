@@ -7,7 +7,9 @@
 const API = 'https://api.apify.com/v2';
 const apifyToken = process.env.APIFY_TOKEN;
 const botToken = process.env.TELEGRAM_BOT_TOKEN;
-const chatId = process.env.TELEGRAM_CHAT_ID;
+// Accept a channel handle with or without the leading @ (numeric chat IDs are used as they are).
+const rawChatId = (process.env.TELEGRAM_CHAT_ID ?? '').trim();
+const chatId = rawChatId && !/^-?\d+$/.test(rawChatId) && !rawChatId.startsWith('@') ? `@${rawChatId}` : rawChatId;
 const dryRun = !botToken || !chatId;
 // Dry runs keep their own "already posted" memory, so previewing never swallows deals the real channel should get.
 // (v2: the first live run failed to post after marking its deals as seen, so live memory starts fresh.)
