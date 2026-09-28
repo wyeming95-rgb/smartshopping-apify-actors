@@ -33,6 +33,11 @@ jobs:
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       TELEGRAM_CASHBACK_CHAT_ID: ${{ secrets.TELEGRAM_CASHBACK_CHAT_ID }}
+      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+      REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
+      REDDIT_SUBREDDIT: ${{ secrets.REDDIT_SUBREDDIT }}
       MODE: ${{ inputs.mode || (github.event.schedule == '37 12 * * *' && 'boosts' || 'deals') }}
     steps:
       - name: Skip scheduled runs until the channel is set up

@@ -5,7 +5,8 @@
 //   node scripts/telegram-channel.mjs boosts   -> one daily digest of cashback increases on popular stores
 //                                                 to TELEGRAM_CASHBACK_CHAT_ID (the cashback channel)
 //   node scripts/telegram-channel.mjs check    -> which chats the secrets point to and which the bot is in
-// Needs APIFY_TOKEN. Without TELEGRAM_BOT_TOKEN it is a dry run that prints the messages instead of posting.
+// With the REDDIT_* secrets set, deals and boosts are also posted as one daily thread each in our own subreddit.
+// Needs APIFY_TOKEN. With neither Telegram nor Reddit configured it is a dry run that prints instead of posting.
 // Never prints the tokens.
 const API = 'https://api.apify.com/v2';
 const apifyToken = process.env.APIFY_TOKEN;
@@ -19,7 +20,18 @@ const CHATS = {
     deals: { secret: 'TELEGRAM_CHAT_ID', id: normalizeChat(process.env.TELEGRAM_CHAT_ID) },
     boosts: { secret: 'TELEGRAM_CASHBACK_CHAT_ID', id: normalizeChat(process.env.TELEGRAM_CASHBACK_CHAT_ID) },
 };
-const dryRun = !botToken;
+const mode = process.argv[2];
+// Our own subreddit: a "script" app on the bot account (reddit.com/prefs/apps), posting one daily thread per mode.
+const REDDIT = {
+    clientId: process.env.REDDIT_CLIENT_ID,
+    clientSecret: process.env.REDDIT_CLIENT_SECRET,
+    username: process.env.REDDIT_USERNAME,
+    password: process.env.REDDIT_PASSWORD,
+    subreddit: (process.env.REDDIT_SUBREDDIT ?? '').trim().replace(/^\/?r\//i, ''),
+};
+const redditOn = Boolean(REDDIT.clientId && REDDIT.clientSecret && REDDIT.username && REDDIT.password && REDDIT.subreddit);
+const telegramOn = Boolean(botToken && CHATS[mode]?.id);
+const dryRun = !telegramOn && !redditOn;
 // Dry runs keep their own "already posted" memory, so previewing never swallows deals the real channel should get.
 // (v2: the first live run failed to post after marking its deals as seen, so live memory starts fresh.)
 const statePrefix = dryRun ? 'telegram-dryrun' : 'telegram-v2';
@@ -99,6 +111,7 @@ async function send(chatId, html) {
         console.log(`--- would post ---\n${html}\n`);
         return;
     }
+    if (!telegramOn) return; // Reddit only for this mode
     await telegram('sendMessage', { chat_id: chatId, text: html, parse_mode: 'HTML', disable_web_page_preview: false });
     await new Promise((r) => setTimeout(r, 1500)); // stay well under Telegram's per-channel rate limit
 }
@@ -140,6 +153,69 @@ export function boostDigest(changes, date = new Date()) {
     return messages;
 }
 
+// ---- Reddit (our own subreddit only) ----
+let redditToken = null;
+const redditAgent = () => `smartshopping-poster/1.0 (by u/${REDDIT.username})`;
+
+/** Logs in before any Actor runs, for the same reason as checkCanPost: a failed post must not lose the day's items. */
+async function redditLogin() {
+    const res = await fetch('https://www.reddit.com/api/v1/access_token', {
+        method: 'POST',
+        headers: {
+            Authorization: `Basic ${Buffer.from(`${REDDIT.clientId}:${REDDIT.clientSecret}`).toString('base64')}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'User-Agent': redditAgent(),
+        },
+        body: new URLSearchParams({ grant_type: 'password', username: REDDIT.username, password: REDDIT.password }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || !json.access_token) throw new Error(`Reddit login failed (HTTP ${res.status}: ${json.error ?? 'no token'}). Check the REDDIT_* secrets; the app must be a "script" app owned by REDDIT_USERNAME.`);
+    redditToken = json.access_token;
+    console.log(`Logged in to Reddit as u/${REDDIT.username}, posting to r/${REDDIT.subreddit}.`);
+}
+
+async function redditPost(title, text) {
+    if (!redditOn) return;
+    const res = await fetch('https://oauth.reddit.com/api/submit', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${redditToken}`, 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': redditAgent() },
+        body: new URLSearchParams({ sr: REDDIT.subreddit, kind: 'self', title: title.slice(0, 300), text, api_type: 'json', resubmit: 'true' }),
+    });
+    const json = await res.json().catch(() => ({}));
+    const errors = json?.json?.errors ?? [];
+    if (!res.ok || errors.length) throw new Error(`Reddit post failed (HTTP ${res.status}): ${JSON.stringify(errors).slice(0, 300)}`);
+    console.log(`Posted to Reddit: ${json.json?.data?.url ?? title}`);
+}
+
+const md = (s) => String(s ?? '').replace(/[[\]]/g, (c) => (c === '[' ? '(' : ')')).replace(/\s+/g, ' ').trim();
+const today = () => new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const telegramLink = (m) => (CHATS[m].id?.startsWith('@') ? `https://t.me/${CHATS[m].id.slice(1)}` : null);
+
+export function redditDeals(list) {
+    const lines = list.map((d) => {
+        const score = d.scoreType === 'temperature' ? `${d.score}°` : d.scoreType === 'votes' ? `+${d.score} votes` : `+${d.score} 👍`;
+        const price = d.price === 0 ? 'FREE' : d.price !== null && d.price !== undefined ? `${SYMBOL[d.currency] ?? ''}${d.price}` : null;
+        return `- ${FLAGS[d.country] ?? ''} **[${md(d.title)}](${d.url})**  \n  ${[price, d.store && `at ${md(d.store)}`, `${score} on ${d.site}`].filter(Boolean).join(' · ')}`;
+    });
+    const tg = telegramLink('deals');
+    return [
+        'The day\'s hottest community-voted deals from Slickdeals (US), hotukdeals (UK) and OzBargain (AU).', '',
+        ...lines, '', '---',
+        `🔔 Alerts for your own keywords: [Deal Scraper](${STORE}/deal-community-scraper)${tg ? ` · Also on Telegram: ${tg}` : ''}`,
+    ].join('\n');
+}
+
+export function redditBoosts(list) {
+    const lines = [...list].sort((a, b) => (b.changePoints ?? 0) - (a.changePoints ?? 0)).map((c) =>
+        `- ${FLAGS[c.country] ?? ''} **[${md(c.merchant)}](${c.url})** on ${c.portalName}: ${c.oldRateText ? `${md(c.oldRateText)} → ` : '🆕 '}**${md(c.newRateText)}**${c.changePoints ? ` (+${c.changePoints})` : ''}`);
+    const tg = telegramLink('boosts');
+    return [
+        'Cashback rate increases today on Rakuten, TopCashback, BeFrugal, Capital One Shopping, Mr. Rebates and ShopBack, for 30 popular stores in the US, UK and Australia.', '',
+        ...lines, '', '---',
+        `🔔 Track your own stores: [Cashback Boost Monitor](${STORE}/cashback-boost-monitor)${tg ? ` · Also on Telegram: ${tg}` : ''}`,
+    ].join('\n');
+}
+
 async function deals() {
     const found = [];
     for (const { source, minScore } of DEAL_FEEDS) {
@@ -151,8 +227,10 @@ async function deals() {
     // Hottest first, relative to each site's threshold, capped so the channel is never flooded.
     const threshold = Object.fromEntries(DEAL_FEEDS.map((f) => [f.source, f.minScore]));
     found.sort((a, b) => b.score / threshold[b.source] - a.score / threshold[a.source]);
-    for (const d of found.slice(0, MAX_DEALS_PER_RUN)) await send(CHATS.deals.id, dealMessage(d));
-    console.log(`posted ${Math.min(found.length, MAX_DEALS_PER_RUN)} deals${dryRun ? ' (dry run)' : ''}`);
+    const top = found.slice(0, MAX_DEALS_PER_RUN);
+    for (const d of top) await send(CHATS.deals.id, dealMessage(d));
+    if (top.length) await redditPost(`🔥 Hot deals · ${today()} (US, UK, AU)`, redditDeals(top));
+    console.log(`posted ${top.length} deals${dryRun ? ' (dry run)' : ''}`);
 }
 
 async function boosts() {
@@ -165,12 +243,18 @@ async function boosts() {
     // A store newly offering cashback is only worth a post when it comes with a percentage rate.
     const posts = changes.filter((c) => c.changeType !== 'new' || c.rateType === 'percent');
     for (const message of boostDigest(posts)) await send(CHATS.boosts.id, message);
+    if (posts.length) await redditPost(`⚡ Cashback boosts · ${today()}`, redditBoosts(posts));
     console.log(`posted a digest of ${posts.length} cashback changes${dryRun ? ' (dry run)' : ''}`);
 }
 
 /** Diagnoses the Telegram setup: which chat each secret points to, and which chats the bot has been added to. */
 async function check() {
-    if (dryRun) throw new Error('TELEGRAM_BOT_TOKEN must be set for a check.');
+    if (redditOn) await redditLogin();
+    else console.log('Reddit: not configured (REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USERNAME, REDDIT_PASSWORD, REDDIT_SUBREDDIT).');
+    if (!botToken) {
+        console.log('Telegram: TELEGRAM_BOT_TOKEN not set.');
+        return;
+    }
     const me = await telegram('getMe', {});
     console.log(`Bot: @${me.username}`);
     for (const { secret, id: chatId } of Object.values(CHATS)) {
@@ -200,20 +284,20 @@ async function check() {
 }
 
 const modes = { deals, boosts, check };
-const mode = process.argv[2];
 if (import.meta.url === `file://${process.argv[1]}`) {
     if (!apifyToken) throw new Error('APIFY_TOKEN is not set');
     if (!modes[mode]) throw new Error(`Usage: telegram-channel.mjs <${Object.keys(modes).join('|')}>`);
     if (mode !== 'check') {
-        if (dryRun) {
-            console.log('TELEGRAM_BOT_TOKEN not set: dry run, nothing is posted.\n');
-        } else if (!CHATS[mode].id) {
+        if (botToken && !telegramOn && !redditOn) {
             // Deals and cashback go to separate channels; without this one's secret there is nowhere to post.
             console.log(`${CHATS[mode].secret} is not set, so there is no channel for ${mode} yet. Skipping.`);
             process.exit(0);
-        } else {
-            await checkCanPost(CHATS[mode]);
         }
+        if (dryRun) console.log('Neither Telegram nor Reddit is configured: dry run, nothing is posted.\n');
+        // Check every destination before any Actor runs, so a setup problem never swallows the day's items.
+        if (telegramOn) await checkCanPost(CHATS[mode]);
+        else if (botToken) console.log(`${CHATS[mode].secret} is not set: Telegram skipped for ${mode}.`);
+        if (redditOn) await redditLogin();
     }
     await modes[mode]();
 }
