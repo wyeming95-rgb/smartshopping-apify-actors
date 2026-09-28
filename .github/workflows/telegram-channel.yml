@@ -5,8 +5,8 @@ name: telegram channel
 
 on:
   schedule:
-    - cron: "7 * * * *" # deals, hourly
-    - cron: "23 */6 * * *" # cashback boosts, every 6 hours
+    - cron: "7 12 * * *" # deals, daily at 12:07 UTC
+    - cron: "37 12 * * *" # cashback boosts, daily at 12:37 UTC
   workflow_dispatch:
     inputs:
       mode:
@@ -31,7 +31,7 @@ jobs:
       APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-      MODE: ${{ inputs.mode || (github.event.schedule == '23 */6 * * *' && 'boosts' || 'deals') }}
+      MODE: ${{ inputs.mode || (github.event.schedule == '37 12 * * *' && 'boosts' || 'deals') }}
     steps:
       - name: Skip scheduled runs until the channel is set up
         if: github.event_name == 'schedule' && (env.TELEGRAM_BOT_TOKEN == '' || env.TELEGRAM_CHAT_ID == '')

@@ -1,6 +1,6 @@
 // Posts hot community deals and cashback boosts to a Telegram channel, using our own Apify Actors.
 // Run from GitHub Actions on a schedule:
-//   node scripts/telegram-channel.mjs deals    -> new hot deals from Slickdeals, hotukdeals and OzBargain
+//   node scripts/telegram-channel.mjs deals    -> new hot deals (daily) from Slickdeals, hotukdeals and OzBargain
 //   node scripts/telegram-channel.mjs boosts   -> cashback rate increases on a watchlist of popular stores
 // Needs APIFY_TOKEN. Posts only when TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are set; otherwise it is a dry run
 // that prints the messages it would send. Never prints the tokens.
