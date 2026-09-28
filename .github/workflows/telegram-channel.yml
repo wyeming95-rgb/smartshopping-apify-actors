@@ -1,4 +1,5 @@
-# Posts hot deals and cashback boosts to the SmartShopping Telegram channel (scripts/telegram-channel.mjs).
+# Posts hot deals (TELEGRAM_CHAT_ID) and a daily cashback digest (TELEGRAM_CASHBACK_CHAT_ID) to two Telegram
+# channels (scripts/telegram-channel.mjs).
 # Scheduled runs do nothing until the TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID secrets are added.
 # Run it manually without those secrets for a dry run that prints the messages instead of posting.
 name: telegram channel
@@ -31,6 +32,7 @@ jobs:
       APIFY_TOKEN: ${{ secrets.APIFY_TOKEN }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      TELEGRAM_CASHBACK_CHAT_ID: ${{ secrets.TELEGRAM_CASHBACK_CHAT_ID }}
       MODE: ${{ inputs.mode || (github.event.schedule == '37 12 * * *' && 'boosts' || 'deals') }}
     steps:
       - name: Skip scheduled runs until the channel is set up
