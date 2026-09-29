@@ -1,0 +1,28 @@
+{
+    "actorSpecification": 1,
+    "fields": {},
+    "views": {
+        "overview": {
+            "title": "Store offers",
+            "transformation": {
+                "fields": ["store", "country", "title", "code", "maxDiscountPercent", "saleEvent", "badge", "cashback", "portalName", "offerUrl", "scrapedAt"]
+            },
+            "display": {
+                "component": "table",
+                "properties": {
+                    "store": { "label": "Store" },
+                    "country": { "label": "Country" },
+                    "title": { "label": "Offer" },
+                    "code": { "label": "Code" },
+                    "maxDiscountPercent": { "label": "Max % off", "format": "number" },
+                    "saleEvent": { "label": "Event" },
+                    "badge": { "label": "Badge" },
+                    "cashback": { "label": "Cashback" },
+                    "portalName": { "label": "Listed on" },
+                    "offerUrl": { "label": "Link", "format": "link" },
+                    "scrapedAt": { "label": "Found", "format": "date" }
+                }
+            }
+        }
+    }
+}

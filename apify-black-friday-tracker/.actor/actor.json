@@ -1,0 +1,14 @@
+{
+  "actorSpecification": 1,
+  "name": "black-friday-sales-tracker",
+  "title": "Black Friday & Store Sales Tracker — Coupons + Cashback",
+  "description": "Track sales, coupon codes and Black Friday offers for any store from Rakuten and TopCashback store pages (US, UK, AU): offer, code, % off, expiry and the cashback on top. Only-new mode for alerts. Pay per offer.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "input": "./input_schema.json",
+  "output": "./output_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "dockerfile": "./Dockerfile"
+}

@@ -88,6 +88,22 @@ const ACTORS = [
         event: { name: 'deal', title: 'Deal', description: 'One community deal saved to the dataset.', priceUsd: 0.001 },
     },
     {
+        name: 'black-friday-sales-tracker',
+        // Default store lists in all three countries, then an onlyNew run twice on the same state.
+        testInput: [{}, { stores: ["Macy's", 'Nike', 'Currys'], onlyNew: true, stateName: 'setup-test' }, { stores: ["Macy's", 'Nike', 'Currys'], onlyNew: true, stateName: 'setup-test' }],
+        allowEmpty: true,
+        printAllItems: true,
+        maxItemChars: 700,
+        listing: {
+            title: 'Black Friday & Store Sales Tracker — Coupons + Cashback',
+            description: 'Track sales, coupon codes and Black Friday offers for any store from Rakuten and TopCashback store pages (US, UK, AU): offer, code, % off, expiry and the cashback on top. Only-new mode for alerts. Pay per offer.',
+            seoTitle: 'Black Friday Deals & Coupon Code Tracker | US UK AU',
+            seoDescription: 'Track Black Friday sales, coupon codes and store offers for any retailer in the US, UK and Australia, with the cashback on top. Alerts for new offers.',
+            categories: ['ECOMMERCE', 'AUTOMATION', 'DEVELOPER_TOOLS'],
+        },
+        event: { name: 'offer', title: 'Store offer', description: 'One store offer (sale, coupon code or promotion) saved to the dataset.', priceUsd: 0.002 },
+    },
+    {
         name: 'cashback-portal-probe',
         testInput: {},
         printAllItems: true,

@@ -1,0 +1,16 @@
+{
+    "actorOutputSchemaVersion": 1,
+    "title": "Store offers",
+    "properties": {
+        "results": {
+            "type": "string",
+            "title": "Offers: sales, codes and cashback",
+            "template": "{{links.apiDefaultDatasetUrl}}/items?view=overview"
+        },
+        "summary": {
+            "type": "string",
+            "title": "Run summary: stores checked, offers found, biggest discounts",
+            "template": "{{links.apiDefaultKeyValueStoreUrl}}/records/SUMMARY"
+        }
+    }
+}

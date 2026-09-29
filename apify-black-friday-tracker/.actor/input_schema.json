@@ -1,0 +1,62 @@
+{
+    "title": "Black Friday & store sales tracker input",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "stores": {
+            "title": "Stores",
+            "type": "array",
+            "description": "Store names or websites, e.g. Macy's, nike.com, Currys. Leave empty to check a built-in list of big retailers in each country.",
+            "editor": "stringList",
+            "prefill": ["Macy's", "Nike", "Best Buy", "Currys", "John Lewis", "THE ICONIC"],
+            "default": []
+        },
+        "countries": {
+            "title": "Countries",
+            "type": "array",
+            "description": "US uses Rakuten and TopCashback; UK and AU use TopCashback.",
+            "editor": "select",
+            "items": { "type": "string", "enum": ["US", "UK", "AU"], "enumTitles": ["United States", "United Kingdom", "Australia"] },
+            "default": ["US", "UK", "AU"]
+        },
+        "onlyBlackFriday": {
+            "title": "Only Black Friday and Cyber Monday offers",
+            "type": "boolean",
+            "description": "Only save offers that mention Black Friday, Cyber Monday or Cyber Week.",
+            "default": false
+        },
+        "onlyWithCode": {
+            "title": "Only offers with a coupon code",
+            "type": "boolean",
+            "default": false
+        },
+        "minDiscountPercent": {
+            "title": "Minimum discount (%)",
+            "type": "integer",
+            "description": "Only save offers mentioning at least this percentage off, e.g. 30. Offers without a percentage are skipped when this is set.",
+            "default": 0,
+            "minimum": 0,
+            "maximum": 99
+        },
+        "keywords": {
+            "title": "Only offers mentioning",
+            "type": "array",
+            "description": "Only save offers whose text contains one of these words, e.g. tv, laptop, shoes.",
+            "editor": "stringList",
+            "default": []
+        },
+        "onlyNew": {
+            "title": "Only new offers",
+            "type": "boolean",
+            "description": "Skip offers already returned by earlier runs. Use with a schedule for alerts.",
+            "default": false
+        },
+        "stateName": {
+            "title": "Memory name for only-new mode",
+            "type": "string",
+            "description": "Use a different name for each schedule so they don't share memory.",
+            "default": "default",
+            "editor": "textfield"
+        }
+    }
+}
