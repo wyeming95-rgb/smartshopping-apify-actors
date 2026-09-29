@@ -52,3 +52,9 @@ test('discounts, sale events and offer types', () => {
     assert.equal(classify({ title: 'Up to 40% off activewear' }).offerType, 'sale');
     assert.equal(classify({ title: 'Earn 6% cash back on everything' }).offerType, 'cashback');
 });
+
+test('input schema: every field has a description (Apify rejects the build otherwise)', async () => {
+    const { readFileSync } = await import('node:fs');
+    const schema = JSON.parse(readFileSync(new URL('../.actor/input_schema.json', import.meta.url), 'utf8'));
+    assert.deepEqual(Object.entries(schema.properties).filter(([, v]) => !v.description).map(([k]) => k), []);
+});

@@ -28,6 +28,7 @@
         "onlyWithCode": {
             "title": "Only offers with a coupon code",
             "type": "boolean",
+            "description": "Only save offers that come with a coupon code.",
             "default": false
         },
         "minDiscountPercent": {

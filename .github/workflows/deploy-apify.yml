@@ -37,7 +37,7 @@ jobs:
           - actor: apify-deal-community-scraper
             actor_id: ""
           - actor: apify-black-friday-tracker
-            actor_id: ""
+            actor_id: "vNedSVuaSFLLdIVWT"
     defaults:
       run:
         working-directory: ${{ matrix.actor }}
