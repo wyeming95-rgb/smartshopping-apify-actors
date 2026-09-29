@@ -7,18 +7,36 @@ import { gotScraping } from 'got-scraping';
 await Actor.init();
 
 // count: regexes whose total and unique first-group matches are reported (e.g. how many stores a directory page holds).
-const LOC = ['<loc>([^<]+)</loc>'];
-const ITEMS = ['<item>', '<entry>', '<title>(?:<!\\[CDATA\\[)?([^<\\]]{3,120})'];
 const DEFAULT_TARGETS = [
-    // Deal communities: RSS feeds and crawl rules.
-    { portal: 'slickdeals-robots', url: 'https://slickdeals.net/robots.txt', count: ['(?:Crawl-delay|Sitemap): *(\\S+)', 'Disallow: *(\\S*(?:rss|newsearch|forums)\\S*)'] },
-    { portal: 'slickdeals-frontpage-rss', url: 'https://slickdeals.net/newsearch.php?mode=frontpage&searcharea=deals&searchin=first&rss=1', count: ITEMS, head: 3000 },
-    { portal: 'slickdeals-popular-rss', url: 'https://feeds.feedburner.com/SlickdealsnetFP', count: ITEMS, head: 1500 },
-    { portal: 'hotukdeals-robots', url: 'https://www.hotukdeals.com/robots.txt', count: ['(?:Crawl-delay|Sitemap): *(\\S+)', 'Disallow: *(\\S*rss\\S*)'] },
-    { portal: 'hotukdeals-hot-rss', url: 'https://www.hotukdeals.com/rss/hot', count: ITEMS, head: 3000 },
-    { portal: 'hotukdeals-new-rss', url: 'https://www.hotukdeals.com/rss/new', count: ITEMS, head: 800 },
-    { portal: 'ozbargain-robots', url: 'https://www.ozbargain.com.au/robots.txt', count: ['(?:Crawl-delay|Sitemap): *(\\S+)', 'Disallow: *(\\S*(?:feed|rss)\\S*)'] },
-    { portal: 'ozbargain-deals-feed', url: 'https://www.ozbargain.com.au/deals/feed', count: ITEMS, head: 3000 },
+    // Black Friday tracker feasibility: retailer homepages (bot walls? readable promos?) and portal store-page offers.
+    { portal: 'us-walmart', url: 'https://www.walmart.com/' },
+    { portal: 'us-target', url: 'https://www.target.com/' },
+    { portal: 'us-bestbuy', url: 'https://www.bestbuy.com/' },
+    { portal: 'us-macys', url: 'https://www.macys.com/' },
+    { portal: 'us-kohls', url: 'https://www.kohls.com/' },
+    { portal: 'us-nike', url: 'https://www.nike.com/' },
+    { portal: 'us-homedepot', url: 'https://www.homedepot.com/' },
+    { portal: 'us-lowes', url: 'https://www.lowes.com/' },
+    { portal: 'us-amazon', url: 'https://www.amazon.com/' },
+    { portal: 'us-oldnavy', url: 'https://oldnavy.gap.com/' },
+    { portal: 'us-sephora', url: 'https://www.sephora.com/' },
+    { portal: 'uk-argos', url: 'https://www.argos.co.uk/' },
+    { portal: 'uk-currys', url: 'https://www.currys.co.uk/' },
+    { portal: 'uk-johnlewis', url: 'https://www.johnlewis.com/' },
+    { portal: 'uk-boots', url: 'https://www.boots.com/' },
+    { portal: 'uk-asos', url: 'https://www.asos.com/' },
+    { portal: 'uk-mands', url: 'https://www.marksandspencer.com/' },
+    { portal: 'uk-next', url: 'https://www.next.co.uk/' },
+    { portal: 'au-jbhifi', url: 'https://www.jbhifi.com.au/' },
+    { portal: 'au-myer', url: 'https://www.myer.com.au/' },
+    { portal: 'au-davidjones', url: 'https://www.davidjones.com/' },
+    { portal: 'au-iconic', url: 'https://www.theiconic.com.au/' },
+    { portal: 'au-bigw', url: 'https://www.bigw.com.au/' },
+    { portal: 'au-kmart', url: 'https://www.kmart.com.au/' },
+    { portal: 'au-harveynorman', url: 'https://www.harveynorman.com.au/' },
+    { portal: 'tcb-us-nike', url: 'https://www.topcashback.com/nike/' },
+    { portal: 'tcb-uk-currys', url: 'https://www.topcashback.co.uk/currys/' },
+    { portal: 'rakuten-macys', url: 'https://www.rakuten.com/shop/macys' },
 ]
 
 const BOT_WALLS = [
@@ -81,6 +99,10 @@ function analyze(html, target) {
     // Raw markup around the first rate mentions, so class names and structure are visible.
     report.htmlAroundRates = [...html.matchAll(RATE_RE)].slice(0, 4).map((m) => html.slice(Math.max(0, m.index - 350), m.index + 120).replace(/\s+/g, ' '));
     report.textRates = [...text.matchAll(RATE_RE)].slice(0, 8).map((m) => m[0]);
+    // Sale banners in visible text: "30% off", "up to 50% off", "extra 20% off", Black Friday / Cyber Monday mentions.
+    report.promos = [...new Set([...text.matchAll(/(?:(?:up to|extra|save|take|an extra)\s+)?\d{1,2}%\s*off[^.!|<]{0,50}/gi)].map((m) => m[0].trim()))].slice(0, 8);
+    report.saleWords = Object.fromEntries(['black friday', 'cyber monday', 'sale', 'clearance', 'free shipping', 'free delivery', 'code'].map((w) => [w, (text.toLowerCase().match(new RegExp(w, 'g')) ?? []).length]));
+    report.textBytes = text.length;
     report.metaDescription = (html.match(/<meta[^>]+name=["']description["'][^>]*>/i)?.[0] ?? '').slice(0, 400);
     report.ogTitle = (html.match(/<meta[^>]+property=["']og:title["'][^>]*>/i)?.[0] ?? '').slice(0, 300);
     if (target.around) {
@@ -114,7 +136,12 @@ for (const target of targets) {
             timeout: { request: 30_000 },
             throwHttpErrors: false,
         });
-        Object.assign(row, { status: res.statusCode, finalUrl: res.url, ms: Date.now() - started, ...analyze(String(res.body), target) });
+        const a = analyze(String(res.body), target);
+        // Compact report for wide surveys: just whether the page loads and what sale text it shows.
+        const keep = target.compact ?? true;
+        Object.assign(row, { status: res.statusCode, finalUrl: res.url, ms: Date.now() - started, ...(keep
+            ? { title: a.title, bytes: a.bytes, textBytes: a.textBytes, botWalls: a.botWalls, promos: a.promos, saleWords: a.saleWords, metaDescription: a.metaDescription.slice(0, 200) }
+            : a) });
     } catch (err) {
         Object.assign(row, { error: err.message.slice(0, 200), ms: Date.now() - started });
     }
