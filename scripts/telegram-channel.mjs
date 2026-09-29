@@ -74,6 +74,27 @@ async function runActor(actor, input, timeoutSecs = 240) {
     return JSON.parse(text);
 }
 
+// "Posted today" markers, so the backup schedule slots skip a mode once it has posted (GitHub often runs
+// scheduled workflows hours late or not at all, so each mode has several slots a day).
+const MARKER_STORE = 'telegram-channel-state';
+const utcDay = () => new Date().toISOString().slice(0, 10);
+async function markerStore() {
+    const res = await fetch(`${API}/key-value-stores?name=${MARKER_STORE}`, { method: 'POST', headers: { Authorization: `Bearer ${apifyToken}` } });
+    if (!res.ok) throw new Error(`key-value store -> HTTP ${res.status}`);
+    return (await res.json()).data.id;
+}
+async function postedOn(key) {
+    const res = await fetch(`${API}/key-value-stores/${await markerStore()}/records/${key}`, { headers: { Authorization: `Bearer ${apifyToken}` } });
+    return res.ok ? (await res.json()).day ?? null : null;
+}
+async function markPosted(key) {
+    await fetch(`${API}/key-value-stores/${await markerStore()}/records/${key}`, {
+        method: 'PUT',
+        headers: { Authorization: `Bearer ${apifyToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ day: utcDay(), at: new Date().toISOString() }),
+    });
+}
+
 async function telegram(method, body) {
     const res = await fetch(`https://api.telegram.org/bot${botToken}/${method}`, {
         method: 'POST',
@@ -299,5 +320,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         else if (botToken) console.log(`${CHATS[mode].secret} is not set: Telegram skipped for ${mode}.`);
         if (redditOn) await redditLogin();
     }
+    const marker = `${statePrefix}-posted-${mode}`;
+    // Scheduled runs post once a day per mode; manual runs always post.
+    if (mode !== 'check' && process.env.ONCE_PER_DAY && await postedOn(marker) === utcDay()) {
+        console.log(`${mode} already posted today (${utcDay()} UTC). Skipping this backup slot.`);
+        process.exit(0);
+    }
     await modes[mode]();
+    if (mode !== 'check') await markPosted(marker);
 }

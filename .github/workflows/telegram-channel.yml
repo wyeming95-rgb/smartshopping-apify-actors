@@ -5,9 +5,15 @@
 name: telegram channel
 
 on:
+  # GitHub often starts scheduled runs hours late or drops them, so each mode has two backup slots.
+  # The script posts once per UTC day per mode: later slots skip once a mode has posted.
   schedule:
-    - cron: "7 12 * * *" # deals, daily at 12:07 UTC
-    - cron: "37 12 * * *" # cashback boosts, daily at 12:37 UTC
+    - cron: "7 12 * * *" # deals, 12:07 UTC
+    - cron: "7 15 * * *" # deals, backup
+    - cron: "7 18 * * *" # deals, backup
+    - cron: "37 12 * * *" # cashback boosts, 12:37 UTC
+    - cron: "37 15 * * *" # cashback boosts, backup
+    - cron: "37 18 * * *" # cashback boosts, backup
   workflow_dispatch:
     inputs:
       mode:
@@ -21,7 +27,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: telegram-channel-${{ github.event.schedule || inputs.mode }}
+  group: telegram-channel-${{ inputs.mode || (startsWith(github.event.schedule, '37 ') && 'boosts' || 'deals') }}
   cancel-in-progress: false
 
 jobs:
@@ -38,7 +44,8 @@ jobs:
       REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
       REDDIT_PASSWORD: ${{ secrets.REDDIT_PASSWORD }}
       REDDIT_SUBREDDIT: ${{ secrets.REDDIT_SUBREDDIT }}
-      MODE: ${{ inputs.mode || (github.event.schedule == '37 12 * * *' && 'boosts' || 'deals') }}
+      MODE: ${{ inputs.mode || (startsWith(github.event.schedule, '37 ') && 'boosts' || 'deals') }}
+      ONCE_PER_DAY: ${{ github.event_name == 'schedule' && '1' || '' }}
     steps:
       - name: Skip scheduled runs until the channel is set up
         if: github.event_name == 'schedule' && (env.TELEGRAM_BOT_TOKEN == '' || env.TELEGRAM_CHAT_ID == '')
