@@ -8,10 +8,10 @@ await Actor.init();
 
 // count: regexes whose total and unique first-group matches are reported (e.g. how many stores a directory page holds).
 const DEFAULT_TARGETS = [
-    // Offer markup on portal store pages (for the Black Friday tracker).
-    { portal: 'tcb-us-nike', url: 'https://www.topcashback.com/nike/', compact: false, around: 'extra 25% off sale', count: ['class="([a-z0-9_-]*(?:offer|voucher|code|deal|promo|expir)[a-z0-9_-]*)"', 'data-([a-z-]*(?:offer|voucher|code|expir)[a-z-]*)='] },
-    { portal: 'tcb-uk-currys', url: 'https://www.topcashback.co.uk/currys/', compact: false, around: 'Black Friday', count: ['class="([a-z0-9_-]*(?:offer|voucher|code|deal|promo|expir)[a-z0-9_-]*)"'] },
-    { portal: 'rakuten-macys', url: 'https://www.rakuten.com/shop/macys', compact: false, around: "50% off kids", count: ['"([a-zA-Z_]*(?:[cC]ode|[cC]oupon|[eE]xpir|[oO]ffer|[dD]escription|[tT]itle)[a-zA-Z_]*)":', '"__typename":"([A-Za-z]+)"'] },
+    // Full offer blocks, to write the Black Friday tracker's parsers.
+    { portal: 'tcb-us-nike', url: 'https://www.topcashback.com/nike/', compact: false, around: 'class="merch-offer__' },
+    { portal: 'tcb-uk-currys', url: 'https://www.topcashback.co.uk/currys/', compact: false, around: 'promo-code-title' },
+    { portal: 'rakuten-macys', url: 'https://www.rakuten.com/shop/macys', compact: false, around: '"coupon_modal_deal_text"' },
 ]
 
 const BOT_WALLS = [
@@ -84,7 +84,7 @@ function analyze(html, target) {
         // Raw markup around the first few mentions of a marker string (merchant name, test id, ...).
         const idx = [];
         for (let i = html.indexOf(target.around); i !== -1 && idx.length < 5; i = html.indexOf(target.around, i + 400)) idx.push(i);
-        report.htmlAroundMarker = idx.map((i) => html.slice(Math.max(0, i - 100), i + 1500).replace(/\s+/g, ' '));
+        report.htmlAroundMarker = idx.map((i) => html.slice(Math.max(0, i - 600), i + 1800).replace(/\s+/g, ' '));
     }
     if (target.count) {
         report.counts = Object.fromEntries(target.count.map((pattern) => {
