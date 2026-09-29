@@ -8,35 +8,10 @@ await Actor.init();
 
 // count: regexes whose total and unique first-group matches are reported (e.g. how many stores a directory page holds).
 const DEFAULT_TARGETS = [
-    // Black Friday tracker feasibility: retailer homepages (bot walls? readable promos?) and portal store-page offers.
-    { portal: 'us-walmart', url: 'https://www.walmart.com/' },
-    { portal: 'us-target', url: 'https://www.target.com/' },
-    { portal: 'us-bestbuy', url: 'https://www.bestbuy.com/' },
-    { portal: 'us-macys', url: 'https://www.macys.com/' },
-    { portal: 'us-kohls', url: 'https://www.kohls.com/' },
-    { portal: 'us-nike', url: 'https://www.nike.com/' },
-    { portal: 'us-homedepot', url: 'https://www.homedepot.com/' },
-    { portal: 'us-lowes', url: 'https://www.lowes.com/' },
-    { portal: 'us-amazon', url: 'https://www.amazon.com/' },
-    { portal: 'us-oldnavy', url: 'https://oldnavy.gap.com/' },
-    { portal: 'us-sephora', url: 'https://www.sephora.com/' },
-    { portal: 'uk-argos', url: 'https://www.argos.co.uk/' },
-    { portal: 'uk-currys', url: 'https://www.currys.co.uk/' },
-    { portal: 'uk-johnlewis', url: 'https://www.johnlewis.com/' },
-    { portal: 'uk-boots', url: 'https://www.boots.com/' },
-    { portal: 'uk-asos', url: 'https://www.asos.com/' },
-    { portal: 'uk-mands', url: 'https://www.marksandspencer.com/' },
-    { portal: 'uk-next', url: 'https://www.next.co.uk/' },
-    { portal: 'au-jbhifi', url: 'https://www.jbhifi.com.au/' },
-    { portal: 'au-myer', url: 'https://www.myer.com.au/' },
-    { portal: 'au-davidjones', url: 'https://www.davidjones.com/' },
-    { portal: 'au-iconic', url: 'https://www.theiconic.com.au/' },
-    { portal: 'au-bigw', url: 'https://www.bigw.com.au/' },
-    { portal: 'au-kmart', url: 'https://www.kmart.com.au/' },
-    { portal: 'au-harveynorman', url: 'https://www.harveynorman.com.au/' },
-    { portal: 'tcb-us-nike', url: 'https://www.topcashback.com/nike/' },
-    { portal: 'tcb-uk-currys', url: 'https://www.topcashback.co.uk/currys/' },
-    { portal: 'rakuten-macys', url: 'https://www.rakuten.com/shop/macys' },
+    // Offer markup on portal store pages (for the Black Friday tracker).
+    { portal: 'tcb-us-nike', url: 'https://www.topcashback.com/nike/', compact: false, around: 'extra 25% off sale', count: ['class="([a-z0-9_-]*(?:offer|voucher|code|deal|promo|expir)[a-z0-9_-]*)"', 'data-([a-z-]*(?:offer|voucher|code|expir)[a-z-]*)='] },
+    { portal: 'tcb-uk-currys', url: 'https://www.topcashback.co.uk/currys/', compact: false, around: 'Black Friday', count: ['class="([a-z0-9_-]*(?:offer|voucher|code|deal|promo|expir)[a-z0-9_-]*)"'] },
+    { portal: 'rakuten-macys', url: 'https://www.rakuten.com/shop/macys', compact: false, around: "50% off kids", count: ['"([a-zA-Z_]*(?:[cC]ode|[cC]oupon|[eE]xpir|[oO]ffer|[dD]escription|[tT]itle)[a-zA-Z_]*)":', '"__typename":"([A-Za-z]+)"'] },
 ]
 
 const BOT_WALLS = [
