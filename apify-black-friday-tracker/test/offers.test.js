@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { classify, maxDiscountPercent, rakutenOffers, saleEventOf, topCashbackOffers } from '../src/offers.js';
+import { classify, codeInText, maxDiscountPercent, rakutenOffers, saleEventOf, topCashbackOffers } from '../src/offers.js';
 import { RAKUTEN_MACYS, TCB_UK_CURRYS, TCB_US_NIKE } from './fixtures/pages.js';
 
 test('Rakuten: offer tiles for the page store, once each', () => {
@@ -46,7 +46,7 @@ test('discounts, sale events and offer types', () => {
     assert.equal(saleEventOf('Boxing Day sale'), 'Boxing Day');
     assert.equal(saleEventOf('New arrivals'), null);
     assert.deepEqual(classify({ title: 'Black Friday: extra 25% off', code: 'BF25' }),
-        { offerType: 'code', maxDiscountPercent: 25, freeShipping: false, saleEvent: 'Black Friday', isBlackFriday: true, isCyberMonday: false });
+        { code: 'BF25', offerType: 'code', maxDiscountPercent: 25, freeShipping: false, saleEvent: 'Black Friday', isBlackFriday: true, isCyberMonday: false });
     assert.equal(classify({ title: 'Free shipping on orders $25+.' }).offerType, 'free-shipping');
     assert.equal(classify({ title: 'Free shipping on orders $25+.' }).freeShipping, true);
     assert.equal(classify({ title: 'Up to 40% off activewear' }).offerType, 'sale');
@@ -57,4 +57,15 @@ test('input schema: every field has a description (Apify rejects the build other
     const { readFileSync } = await import('node:fs');
     const schema = JSON.parse(readFileSync(new URL('../.actor/input_schema.json', import.meta.url), 'utf8'));
     assert.deepEqual(Object.entries(schema.properties).filter(([, v]) => !v.description).map(([k]) => k), []);
+});
+
+test('codes quoted in the offer text', () => {
+    assert.equal(codeInText('40-50% off Engagement Rings with code "BEST".'), 'BEST');
+    assert.equal(codeInText('Use code SAVE20 at checkout'), 'SAVE20');
+    assert.equal(codeInText('Promo code: XMAS-25!'), 'XMAS-25');
+    assert.equal(codeInText('No code required'), null);
+    assert.equal(codeInText('Enter the code at checkout'), null);
+    const o = classify({ title: '60% off Pillows with code “HOME”', description: null, code: null });
+    assert.deepEqual([o.code, o.offerType], ['HOME', 'code']);
+    assert.equal(classify({ title: 'Selected Printers.', description: 'Deals exclude refurbished items.' }).offerType, 'cashback');
 });

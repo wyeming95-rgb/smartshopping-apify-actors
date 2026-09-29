@@ -36,14 +36,25 @@ export function maxDiscountPercent(s) {
     return best;
 }
 
+/** A code quoted in the offer text: 'with code "BEST"', 'use code SAVE20', 'Promo code: XMAS25'. */
+export function codeInText(s) {
+    const m = String(s ?? '').match(/\b(?:promo|coupon|voucher|discount)?\s*code\s*:?\s*["“'‘]?([A-Za-z0-9]*[A-Z0-9][A-Za-z0-9-]{2,19})["”'’]?(?=[\s.,;!)]|$)/i);
+    const code = m?.[1];
+    // Codes are shouted: "BEST", "SAVE20". Skip ordinary words ("code required", "code at checkout").
+    return code && code === code.toUpperCase() && /[A-Z]/.test(code) ? code : null;
+}
+
 /** Fields derived from an offer's wording, shared by both portals. */
 export function classify({ title, description, code }) {
     const all = `${title} ${description ?? ''}`;
+    code = code || codeInText(all);
     const discount = maxDiscountPercent(all);
     const freeShipping = /free\s+(?:standard\s+|next[- ]day\s+|2-day\s+)?(?:shipping|delivery)/i.test(all);
     const event = saleEventOf(all);
     return {
-        offerType: code ? 'code' : discount !== null || /\bsale\b|\boff\b|deals?\b|save/i.test(all) ? 'sale' : freeShipping ? 'free-shipping' : 'cashback',
+        code: code || null,
+        // Sale words count in the title only; descriptions are mostly terms and conditions.
+        offerType: code ? 'code' : discount !== null || /\bsale\b|\boff\b|\bdeals?\b|\bsave\b/i.test(title) ? 'sale' : freeShipping ? 'free-shipping' : 'cashback',
         maxDiscountPercent: discount,
         freeShipping,
         saleEvent: event,

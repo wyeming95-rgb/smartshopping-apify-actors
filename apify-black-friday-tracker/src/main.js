@@ -75,7 +75,6 @@ async function checkStore({ store, portal }) {
                 country: portal.country,
                 title: o.title,
                 description: o.description,
-                code: o.code,
                 ...classify(o),
                 badge: o.badge,
                 cashback: o.cashback,
