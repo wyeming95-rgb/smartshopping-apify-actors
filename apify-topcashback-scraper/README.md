@@ -76,6 +76,7 @@ The store list comes from each TopCashback site's public sitemap. The Actor then
 - [Cashback Boost Monitor](https://apify.com/Smart-Shopping-Data/cashback-boost-monitor): alerts when cashback rates for your stores go up, go down or appear.
 - [Rakuten Cashback Scraper](https://apify.com/Smart-Shopping-Data/rakuten-cashback-scraper): every Rakuten (US) store with its current rate.
 - [Deal Scraper](https://apify.com/Smart-Shopping-Data/deal-community-scraper): the latest Slickdeals, hotukdeals and OzBargain deals, with keyword alerts.
+- [Black Friday & Store Sales Tracker](https://apify.com/Smart-Shopping-Data/black-friday-sales-tracker): sales, coupon codes and Black Friday offers for any store (US, UK, AU), with the cashback on top.
 
 ## Support
 

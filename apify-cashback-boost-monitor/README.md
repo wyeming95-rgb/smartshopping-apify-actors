@@ -95,6 +95,7 @@ Pay per change: you are only charged for changes reported. Runs where nothing ch
 - [Rakuten Cashback Scraper](https://apify.com/Smart-Shopping-Data/rakuten-cashback-scraper): every Rakuten (US) store with its current rate.
 - [TopCashback Scraper](https://apify.com/Smart-Shopping-Data/topcashback-scraper): every TopCashback store in the US, UK and Australia with its current rate.
 - [Deal Scraper](https://apify.com/Smart-Shopping-Data/deal-community-scraper): the latest Slickdeals, hotukdeals and OzBargain deals, with keyword alerts.
+- [Black Friday & Store Sales Tracker](https://apify.com/Smart-Shopping-Data/black-friday-sales-tracker): sales, coupon codes and Black Friday offers for any store (US, UK, AU), with the cashback on top.
 
 ## Support
 
